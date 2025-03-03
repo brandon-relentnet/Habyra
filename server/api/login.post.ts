@@ -1,4 +1,6 @@
+// server/api/login.post.ts
 import { z } from "zod";
+import { verifyUser } from "../utils/db";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -6,20 +8,43 @@ const bodySchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  const { email, password } = await readValidatedBody(event, bodySchema.parse);
+  try {
+    const { email, password } = await readValidatedBody(
+      event,
+      bodySchema.parse
+    );
 
-  if (email === "admin@admin.com" && password === "iamtheadmin") {
-    // set the user session in the cookie
-    // this server util is auto-imported by the auth-utils module
+    // Verify user credentials against database
+    const user = await verifyUser(email, password);
+
+    if (!user) {
+      throw createError({
+        statusCode: 401,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Set user session in the cookie
     await setUserSession(event, {
       user: {
-        name: "John Doe",
+        id: user.id,
+        name: user.name,
+        email: user.email,
       },
     });
-    return {};
+
+    return { success: true };
+  } catch (error: any) {
+    // Handle validation errors
+    if (error.name === "ZodError") {
+      throw createError({
+        statusCode: 400,
+        message: "Validation error",
+        data: error.errors,
+      });
+    }
+
+    // Re-throw other errors
+    throw error;
   }
-  throw createError({
-    statusCode: 401,
-    message: "Bad credentials",
-  });
 });

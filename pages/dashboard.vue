@@ -1,13 +1,13 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['authenticated'],
-})
-  
-const { user, clear: clearSession } = useUserSession()
+  middleware: ["authenticated"],
+});
+
+const { user, clear: clearSession } = useUserSession();
 
 async function logout() {
-  await clearSession()
-  await navigateTo('/login')
+  await clearSession();
+  await navigateTo("/registration");
 }
 </script>
 
