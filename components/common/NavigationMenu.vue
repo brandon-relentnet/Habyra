@@ -8,6 +8,7 @@ const navItems = [
   { name: "Habits", path: "/habits" },
   { name: "Fitness", path: "/fitness" },
   { name: "Wellness", path: "/wellness" },
+  { name: "Dashboard", path: "/dashboard" },
 ];
 </script>
 
