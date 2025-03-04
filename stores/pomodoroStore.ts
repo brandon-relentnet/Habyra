@@ -282,7 +282,7 @@ export const usePomodoroStore = defineStore("pomodoro", {
       }
     },
 
-    setNotificationSound(sound) {
+    setNotificationSound(sound: string) {
       // Set the sound directly
       this.settings.notificationSound = sound;
 
