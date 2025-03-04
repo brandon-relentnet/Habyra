@@ -3,8 +3,9 @@ export default {
   name: "HomePage",
   data() {
     return {
-      appTitle: "Healthy Heart",
-      appSubtitle: "Your personal health and productivity application",
+      appTitle: "Habyra",
+      appSlogan: "One app, every habit",
+      appSubtitle: "Your all-in-one tool for building habits, boosting productivity, and prioritizing wellness — effortlessly",
       introTitle: "Welcome to Your Health Journey",
       introDescription:
         "This application helps you build better health habits, stay productive, and track your progress all in one convenient dashboard.",
@@ -69,8 +70,8 @@ export default {
       roadmap: [
         {
           title: "Phase 1: Core Infrastructure & Pomodoro Timer",
-          progressClass: "bg-gold",
-          status: "Current Phase",
+          progressClass: "bg-love",
+          status: "Completed",
           tasks: [
             "Project setup with Nuxt and UI framework",
             "Core navigation and dashboard layout",
@@ -81,8 +82,8 @@ export default {
         },
         {
           title: "Phase 2: Daily Health Tracking",
-          progressClass: "bg-muted",
-          status: "Upcoming",
+          progressClass: "bg-gold",
+          status: "Current Phase",
           tasks: [
             "Habit tracking system",
             "Desk health features",
