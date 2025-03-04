@@ -14,7 +14,7 @@ const navItems = [
 
 <template>
   <div class="relative h-20 w-full">
-    <nav class="fixed top-0 left-0 w-full bg-base h-20">
+    <nav class="fixed top-0 left-0 w-full bg-base h-20 z-50">
       <ul class="flex text-text gap-x-4 items-center justify-center h-full">
         <li v-for="item in navItems" :key="item.name">
           <NuxtLink :to="item.path" class="text-text px-4 py-2">

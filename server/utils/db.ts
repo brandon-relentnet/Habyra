@@ -28,6 +28,36 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
+
+    // Create pomodoro_sessions table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS pomodoro_sessions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        session_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        duration INT NOT NULL COMMENT 'Duration in seconds',
+        session_type ENUM('work', 'short_break', 'long_break') NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create pomodoro_statistics table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS pomodoro_statistics (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        total_sessions INT NOT NULL DEFAULT 0,
+        total_focus_time INT NOT NULL DEFAULT 0 COMMENT 'Total focus time in seconds',
+        sessions_today INT NOT NULL DEFAULT 0,
+        sessions_this_week INT NOT NULL DEFAULT 0,
+        last_session_date DATE,
+        last_week_number INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_user_stats (user_id)
+      )
+    `);
     console.log("Database initialized successfully");
   } catch (error) {
     console.error("Error initializing database:", error);
