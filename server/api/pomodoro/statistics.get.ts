@@ -29,12 +29,9 @@ interface SessionUser {
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
-    console.log("Statistics API called");
-
     // 1. Get authenticated user
     const user = (await requireUserSession(event)) as unknown as SessionUser;
     const userId = user.user.id;
-    console.log("User authenticated:", userId);
 
     if (!user || !userId) {
       throw createError({
@@ -47,11 +44,9 @@ export default defineEventHandler(async (event: H3Event) => {
     // 2. Get database connection
     const pool = (await import("../../utils/db")).default;
     const connection = await pool.getConnection();
-    console.log("Database connection established");
 
     try {
       // 3. Get statistics data
-      console.log("Fetching statistics for user:", userId);
       const [statsRows] = await connection.execute<StatisticsRow[]>(
         `SELECT 
           total_sessions as totalSessions,
@@ -65,16 +60,7 @@ export default defineEventHandler(async (event: H3Event) => {
         [userId]
       );
 
-      console.log(
-        "Statistics query result:",
-        statsRows && statsRows.length ? "Found" : "Not found"
-      );
-      if (statsRows && statsRows.length) {
-        console.log("Found statistics:", JSON.stringify(statsRows[0]));
-      }
-
       // 4. Get recent session history (most recent 100 sessions)
-      console.log("Fetching session history for user:", userId);
       const [sessionRows] = await connection.execute<SessionRow[]>(
         `SELECT 
           session_date as date,
@@ -85,11 +71,6 @@ export default defineEventHandler(async (event: H3Event) => {
         ORDER BY session_date DESC 
         LIMIT 100`,
         [userId]
-      );
-      console.log(
-        "Session history query returned",
-        sessionRows ? sessionRows.length : 0,
-        "sessions"
       );
 
       // 5. Format the data to match the client-side format
@@ -128,13 +109,6 @@ export default defineEventHandler(async (event: H3Event) => {
         success: true,
       };
 
-      console.log("Returning statistics with", sessions.length, "sessions");
-      console.log("Stats summary:", {
-        completedSessions: stats.completedSessions,
-        completedToday: stats.completedToday,
-        sessionsHistoryLength: stats.sessionsHistory.length,
-      });
-
       return result;
     } catch (error) {
       console.error("Database error:", error);
@@ -146,7 +120,6 @@ export default defineEventHandler(async (event: H3Event) => {
     } finally {
       // Release the connection
       connection.release();
-      console.log("Database connection released");
     }
   } catch (error) {
     // Rethrow any error that occurred

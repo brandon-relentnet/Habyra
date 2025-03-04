@@ -30,12 +30,9 @@ export default defineEventHandler(async (event: H3Event) => {
   let connection = null;
 
   try {
-    console.log("Pomodoro session save started");
-
     // 1. Get authenticated user
     const user = (await requireUserSession(event)) as unknown as SessionUser;
     const userId = user.user.id;
-    console.log("User authenticated:", userId);
 
     if (!user || !userId) {
       throw createError({
@@ -47,7 +44,6 @@ export default defineEventHandler(async (event: H3Event) => {
 
     // 2. Parse and validate request body
     const body = await readBody<SessionData>(event);
-    console.log("Received body:", JSON.stringify(body));
 
     // Basic validation
     if (!body) {
@@ -92,23 +88,16 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // 3. Get database connection
-    console.log("Getting database connection");
     const pool = (await import("../../utils/db")).default;
     connection = await pool.getConnection();
-    console.log("Database connection established");
 
     try {
       // Begin transaction
-      console.log("Beginning transaction");
       await connection.beginTransaction();
 
       // 4. Insert session record
-      console.log("Inserting session record");
       const sessionDate = new Date(body.date);
-      console.log("Parsed date:", sessionDate);
-
       const sessionParams = [userId, sessionDate, body.duration, body.type];
-      console.log("Session params:", sessionParams);
 
       try {
         const [sessionResult] = await connection.execute(
@@ -120,7 +109,6 @@ export default defineEventHandler(async (event: H3Event) => {
           ) VALUES (?, ?, ?, ?)`,
           sessionParams
         );
-        console.log("Session inserted successfully");
       } catch (sqlError) {
         console.error("SQL Error inserting session:", sqlError);
         const errorMessage = (sqlError as Error).message || "Unknown error";
@@ -133,24 +121,17 @@ export default defineEventHandler(async (event: H3Event) => {
 
       // 5. Update statistics (only for work sessions)
       if (body.type === "work") {
-        console.log("Updating statistics for work session");
-
         const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
         const currentWeek = getWeekNumber(new Date());
-        console.log("Today:", today, "Current week:", currentWeek);
 
         // Check if statistics record exists
         try {
-          console.log("Checking for existing statistics");
           const [statsRows] = await connection.execute(
             "SELECT * FROM pomodoro_statistics WHERE user_id = ?",
             [userId]
           );
 
-          console.log("Stats query result:", statsRows);
-
           if (Array.isArray(statsRows) && statsRows.length > 0) {
-            console.log("Updating existing statistics");
             // Update existing statistics
             await connection.execute(
               `UPDATE pomodoro_statistics 
@@ -165,9 +146,7 @@ export default defineEventHandler(async (event: H3Event) => {
               WHERE user_id = ?`,
               [body.duration, today, currentWeek, todayStr, currentWeek, userId]
             );
-            console.log("Statistics updated successfully");
           } else {
-            console.log("Creating new statistics record");
             // Create new statistics record
             await connection.execute(
               `INSERT INTO pomodoro_statistics (
@@ -181,7 +160,6 @@ export default defineEventHandler(async (event: H3Event) => {
               ) VALUES (?, 1, ?, 1, 1, ?, ?)`,
               [userId, body.duration, todayStr, currentWeek]
             );
-            console.log("New statistics record created");
           }
         } catch (statsError) {
           console.error("SQL Error updating statistics:", statsError);
@@ -196,9 +174,7 @@ export default defineEventHandler(async (event: H3Event) => {
       }
 
       // Commit transaction
-      console.log("Committing transaction");
       await connection.commit();
-      console.log("Transaction committed successfully");
 
       return {
         success: true,
@@ -209,7 +185,6 @@ export default defineEventHandler(async (event: H3Event) => {
       console.error("Error during transaction, rolling back:", error);
       if (connection) {
         await connection.rollback();
-        console.log("Transaction rolled back");
       }
 
       // Rethrow the error
@@ -235,7 +210,6 @@ export default defineEventHandler(async (event: H3Event) => {
     // Release the connection
     if (connection) {
       connection.release();
-      console.log("Database connection released");
     }
   }
 });
