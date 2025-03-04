@@ -65,7 +65,6 @@ const statusMessage = computed(() => {
     </header>
 
     <main class="container mx-auto px-4 py-8">
-        <PomodoroTimerDebug />
       <!-- Main Timer Section -->
       <section class="max-w-2xl mx-auto mb-10">
         <div class="bg-surface rounded-2xl p-8 shadow-md">
