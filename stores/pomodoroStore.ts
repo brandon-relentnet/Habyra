@@ -282,6 +282,25 @@ export const usePomodoroStore = defineStore("pomodoro", {
       }
     },
 
+    setNotificationSound(sound) {
+      // Set the sound directly
+      this.settings.notificationSound = sound;
+
+      // Log for debugging
+      console.log("Store: Setting notification sound to:", sound);
+
+      // Force state update to ensure persistence triggers
+      this.$state = {
+        ...this.$state,
+        settings: {
+          ...this.settings,
+        },
+      };
+
+      // Make sure changes are applied to the timer
+      this.applySettings();
+    },
+
     showNotification(title: string, body: string) {
       if (!this.settings.notificationsEnabled) return;
 
@@ -307,7 +326,7 @@ export const usePomodoroStore = defineStore("pomodoro", {
 
       try {
         const audio = new Audio(
-          `/sounds/${this.settings.notificationSound}.mp3`
+          `/sounds/${this.settings.notificationSound}.wav`
         );
         audio.play();
       } catch (error) {
