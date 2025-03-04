@@ -11,5 +11,6 @@ export default defineNuxtConfig({
     "nuxt-auth-utils",
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
+    "@formkit/auto-animate/nuxt",
   ],
 });

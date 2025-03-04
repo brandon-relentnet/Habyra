@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@heroicons/vue": "^2.2.0",
     "@pinia/nuxt": "^0.10.1",
     "@tailwindcss/vite": "^4.0.9",

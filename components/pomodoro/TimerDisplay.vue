@@ -60,7 +60,7 @@ const displayState = computed(() => {
 </script>
 
 <template>
-  <div class="w-64 h-64 mx-auto relative">
+  <div class="size-64 mx-auto relative">
     <!-- Progress Circle -->
     <svg class="w-full h-full" viewBox="0 0 100 100">
       <!-- Background Circle -->
@@ -69,7 +69,7 @@ const displayState = computed(() => {
         cy="50"
         r="45"
         fill="none"
-        stroke="#2a2e36"
+        class="stroke-highlight-med"
         stroke-width="8"
       />
       <!-- Progress Circle -->
@@ -78,7 +78,7 @@ const displayState = computed(() => {
         cy="50"
         r="45"
         fill="none"
-        :stroke="isBreakMode ? '#9ccfd8' : '#eb6f92'"
+        :class="{ 'stroke-foam': isBreakMode, 'stroke-love': !isBreakMode }"
         stroke-width="8"
         stroke-linecap="round"
         :stroke-dasharray="`${circleProgress}, 283`"
@@ -91,7 +91,7 @@ const displayState = computed(() => {
       <span class="text-5xl font-bold tracking-widest">{{
         formattedTime
       }}</span>
-      <span class="text-lg text-subtle mt-2 capitalize">
+      <span class="text-lg text-subtle mt-2 capitalize italic font-serif">
         {{ displayState }}
       </span>
     </div>

@@ -42,9 +42,9 @@ onMounted(async () => {
 const statusMessage = computed(() => {
   switch (timerState.value) {
     case "running":
-      return `Focus on your work. Take a break in ${formattedTime.value}.`;
+      return `Focus on your work.`;
     case "break":
-      return `Take a break and relax! Next session in ${formattedTime.value}.`;
+      return `Take a break and relax!`;
     case "paused":
       return "Timer paused. Resume when you're ready.";
     default:
@@ -67,13 +67,13 @@ const statusMessage = computed(() => {
     <main class="container mx-auto px-4 py-8">
       <!-- Main Timer Section -->
       <section class="max-w-2xl mx-auto mb-10">
-        <div class="bg-surface rounded-2xl p-8 shadow-md">
+        <div class="p-8">
           <!-- Timer Display -->
           <div class="text-center mb-8">
             <PomodoroTimerDisplay />
 
             <!-- Current Status -->
-            <div class="mt-4 text-subtle">
+            <div class="mt-4 text-subtle italic font-serif">
               <p>{{ statusMessage }}</p>
             </div>
           </div>
@@ -89,7 +89,7 @@ const statusMessage = computed(() => {
 
         <!-- Statistics Section -->
         <PomodoroStatistics v-if="loggedIn" />
-        <div v-else class="bg-surface rounded-2xl p-6 shadow-md">
+        <div v-else class="p-6">
           <h2 class="text-xl font-semibold mb-4">Statistics</h2>
           <div class="bg-overlay/30 p-6 rounded-xl text-center">
             <p class="mb-3">Please log in to track and view your statistics.</p>

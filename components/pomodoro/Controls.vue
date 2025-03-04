@@ -2,6 +2,7 @@
 import { usePomodoroStore } from "~/stores/pomodoroStore";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
+import autoAnimate from "@formkit/auto-animate";
 
 // Import Heroicons
 import {
@@ -39,11 +40,11 @@ const skipBreak = () => pomodoroStore.skipBreak();
 </script>
 
 <template>
-  <div class="flex flex-wrap justify-center gap-4">
+  <div v-auto-animate class="flex flex-wrap justify-center gap-4">
     <button
       v-if="timerState === 'idle' || timerState === 'paused'"
       @click="startTimer"
-      class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
+      class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
     >
       <PlayIcon class="w-5 h-5" />
       {{ timerState === "paused" ? "Resume" : "Start" }}
@@ -52,7 +53,7 @@ const skipBreak = () => pomodoroStore.skipBreak();
     <button
       v-if="timerState === 'running' || timerState === 'break'"
       @click="pauseTimer"
-      class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
+      class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
     >
       <PauseIcon class="w-5 h-5" />
       Pause
@@ -61,7 +62,7 @@ const skipBreak = () => pomodoroStore.skipBreak();
     <button
       v-if="isWorkMode"
       @click="resetTimer"
-      class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
+      class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
     >
       <ArrowPathIcon class="w-5 h-5" />
       Reset
@@ -70,7 +71,7 @@ const skipBreak = () => pomodoroStore.skipBreak();
     <button
       v-if="timerState === 'running'"
       @click="skipToBreak"
-      class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
+      class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
     >
       <ForwardIcon class="w-5 h-5" />
       Skip to Break
@@ -79,7 +80,7 @@ const skipBreak = () => pomodoroStore.skipBreak();
     <button
       v-if="isBreakMode"
       @click="skipBreak"
-      class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
+      class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
     >
       <ForwardIcon class="w-5 h-5" />
       Skip Break
