@@ -26,6 +26,7 @@ function getWeekNumber(d: Date): number {
 }
 
 export default defineEventHandler(async (event: H3Event) => {
+  const todayStr = new Date().toISOString().split("T")[0];
   let connection = null;
 
   try {
@@ -162,14 +163,7 @@ export default defineEventHandler(async (event: H3Event) => {
                 last_week_number = ?,
                 updated_at = NOW()
               WHERE user_id = ?`,
-              [
-                body.duration,
-                today,
-                currentWeek,
-                new Date(),
-                currentWeek,
-                userId,
-              ]
+              [body.duration, today, currentWeek, todayStr, currentWeek, userId]
             );
             console.log("Statistics updated successfully");
           } else {
@@ -185,7 +179,7 @@ export default defineEventHandler(async (event: H3Event) => {
                 last_session_date,
                 last_week_number
               ) VALUES (?, 1, ?, 1, 1, ?, ?)`,
-              [userId, body.duration, new Date(), currentWeek]
+              [userId, body.duration, todayStr, currentWeek]
             );
             console.log("New statistics record created");
           }
@@ -226,7 +220,7 @@ export default defineEventHandler(async (event: H3Event) => {
     console.error("Error in sessions.post.ts:", error);
 
     // If this is not already a h3 error, create one
-    if (!(error instanceof Error) || !('statusCode' in error)) {
+    if (!(error instanceof Error) || !("statusCode" in error)) {
       return createError({
         statusCode: 500,
         statusMessage: "Internal Server Error",

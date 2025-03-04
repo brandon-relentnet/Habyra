@@ -1,6 +1,7 @@
 <script setup>
 import { usePomodoroStore } from "~/stores/pomodoroStore";
 import { storeToRefs } from "pinia";
+import { computed } from "vue";
 
 // Import Heroicons
 import {
@@ -11,7 +12,23 @@ import {
 } from "@heroicons/vue/24/solid";
 
 const pomodoroStore = usePomodoroStore();
-const { timerState } = storeToRefs(pomodoroStore);
+const { timerState, previousState } = storeToRefs(pomodoroStore);
+
+// Computed property to determine if we're in break mode (either active or paused)
+const isBreakMode = computed(() => {
+  return (
+    timerState.value === "break" ||
+    (timerState.value === "paused" && previousState.value === "break")
+  );
+});
+
+// Computed property to determine if we're in work mode (either active or paused)
+const isWorkMode = computed(() => {
+  return (
+    timerState.value === "running" ||
+    (timerState.value === "paused" && previousState.value === "running")
+  );
+});
 
 // Timer control functions
 const startTimer = () => pomodoroStore.startTimer();
@@ -42,7 +59,7 @@ const skipBreak = () => pomodoroStore.skipBreak();
     </button>
 
     <button
-      v-if="timerState === 'running' || timerState === 'paused'"
+      v-if="isWorkMode"
       @click="resetTimer"
       class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
     >
@@ -60,7 +77,7 @@ const skipBreak = () => pomodoroStore.skipBreak();
     </button>
 
     <button
-      v-if="timerState === 'break'"
+      v-if="isBreakMode"
       @click="skipBreak"
       class="px-6 py-3 bg-overlay hover:bg-overlay/80 rounded-xl font-medium flex items-center gap-2"
     >

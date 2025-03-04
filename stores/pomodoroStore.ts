@@ -31,6 +31,7 @@ export interface PomodoroStatistics {
 export interface PomodoroState {
   // Timer state
   timerState: "idle" | "running" | "paused" | "break";
+  previousState: "running" | "break" | null;
   timeRemaining: number;
   initialTime: number;
   breakTime: number;
@@ -61,6 +62,7 @@ export const usePomodoroStore = defineStore("pomodoro", {
   state: (): PomodoroState => ({
     // Timer state
     timerState: "idle",
+    previousState: null,
     timeRemaining: 25 * 60, // Default: 25 minutes in seconds
     initialTime: 25 * 60,
     breakTime: 5 * 60, // Default: 5 minutes in seconds
@@ -151,7 +153,12 @@ export const usePomodoroStore = defineStore("pomodoro", {
 
     startTimer() {
       if (this.timerState === "idle" || this.timerState === "paused") {
-        this.timerState = "running";
+        // If we're resuming from a paused state, check if we were in a break
+        if (this.timerState === "paused" && this.previousState) {
+          this.timerState = this.previousState;
+        } else {
+          this.timerState = "running";
+        }
 
         if (this.timerInterval) {
           clearInterval(this.timerInterval);
@@ -169,6 +176,8 @@ export const usePomodoroStore = defineStore("pomodoro", {
 
     pauseTimer() {
       if (this.timerState === "running" || this.timerState === "break") {
+        // Store the current state before pausing
+        this.previousState = this.timerState;
         this.timerState = "paused";
         if (this.timerInterval) {
           clearInterval(this.timerInterval);
@@ -220,7 +229,7 @@ export const usePomodoroStore = defineStore("pomodoro", {
           synced: false,
         };
 
-        this.statistics.sessionsHistory.push(newSession);
+        this.statistics.sessionsHistory.unshift(newSession);
 
         // Limit history to last 100 sessions
         if (this.statistics.sessionsHistory.length > 100) {

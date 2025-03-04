@@ -54,10 +54,10 @@ onMounted(async () => {
       <h2 class="text-xl font-semibold">Your Statistics</h2>
       <button
         @click="syncWithServer"
-        class="flex items-center gap-1 text-subtle hover:text-text p-1 rounded"
+        class="flex items-center gap-1 text-subtle hover:text-text p-1 rounded cursor-pointer"
         :disabled="isSyncing"
       >
-        <ArrowPathIcon class="w-4 h-4" :class="{ 'animate-spin': isSyncing }" />
+        <ArrowPathIcon class="size-4" :class="{ 'animate-spin': isSyncing }" />
         <span class="text-xs">{{ isSyncing ? "Syncing..." : "Sync" }}</span>
       </button>
     </div>
@@ -116,9 +116,7 @@ onMounted(async () => {
       <div class="bg-overlay/30 p-4 rounded-xl max-h-56 overflow-y-auto">
         <div
           v-for="(session, index) in statistics.sessionsHistory
-            .slice()
-            .reverse()
-            .slice(0, 10)"
+            .slice()"
           :key="index"
           class="py-2 border-b border-overlay last:border-b-0"
         >

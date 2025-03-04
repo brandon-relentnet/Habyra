@@ -1,9 +1,62 @@
 <script setup>
 import { usePomodoroStore } from "~/stores/pomodoroStore";
 import { storeToRefs } from "pinia";
+import { computed } from "vue";
 
 const pomodoroStore = usePomodoroStore();
-const { timerState, formattedTime, progress } = storeToRefs(pomodoroStore);
+const {
+  timerState,
+  formattedTime,
+  timeRemaining,
+  initialTime,
+  breakTime,
+  longBreakTime,
+  previousState,
+} = storeToRefs(pomodoroStore);
+
+// Determine if in break mode (either active or paused-during-break)
+const isBreakMode = computed(() => {
+  return (
+    timerState.value === "break" ||
+    (timerState.value === "paused" && previousState.value === "break")
+  );
+});
+
+// Recalculate progress directly in the component
+const circleProgress = computed(() => {
+  // Calculate maximum time based on current state
+  let maxTime;
+
+  if (isBreakMode.value) {
+    // If on a break, determine if it's a long break
+    const isLongBreak =
+      pomodoroStore.statistics.completedSessions %
+        pomodoroStore.settings.sessionsBeforeLongBreak ===
+      0;
+    maxTime = isLongBreak ? longBreakTime.value : breakTime.value;
+  } else {
+    // For work sessions
+    maxTime = initialTime.value;
+  }
+
+  // Calculate progress percentage (0 to 100)
+  const percentage = ((maxTime - timeRemaining.value) / maxTime) * 100;
+
+  // Convert percentage to stroke-dasharray value
+  // Circle circumference = 2 * PI * radius = 2 * 3.14159 * 45 ≈ 283
+  const circumference = 283;
+  return (percentage / 100) * circumference;
+});
+
+// Determine display state text
+const displayState = computed(() => {
+  if (timerState.value === "idle") return "Ready";
+  if (timerState.value === "paused") {
+    // If paused, show what mode we're paused in
+    return previousState.value === "break" ? "Break (Paused)" : "Paused";
+  }
+  return timerState.value;
+});
 </script>
 
 <template>
@@ -25,10 +78,10 @@ const { timerState, formattedTime, progress } = storeToRefs(pomodoroStore);
         cy="50"
         r="45"
         fill="none"
-        :stroke="timerState === 'break' ? '#9ccfd8' : '#eb6f92'"
+        :stroke="isBreakMode ? '#9ccfd8' : '#eb6f92'"
         stroke-width="8"
         stroke-linecap="round"
-        :stroke-dasharray="`${progress * 2.83}, 283`"
+        :stroke-dasharray="`${circleProgress}, 283`"
         transform="rotate(-90 50 50)"
       />
     </svg>
@@ -39,7 +92,7 @@ const { timerState, formattedTime, progress } = storeToRefs(pomodoroStore);
         formattedTime
       }}</span>
       <span class="text-lg text-subtle mt-2 capitalize">
-        {{ timerState === "idle" ? "Ready" : timerState }}
+        {{ displayState }}
       </span>
     </div>
   </div>
