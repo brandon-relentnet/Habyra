@@ -198,19 +198,22 @@ function formatDate(dateString?: string) {
   <div class="min-h-screen bg-base text-text pb-16">
     <!-- Quick add section -->
     <div class="flex justify-between items-end mb-4">
-      <div class="flex gap-2">
-        <input
-          v-model="newTask"
-          @keyup.enter="addTask(newTask)"
-          placeholder="Task title"
-          class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
-        />
-        <button
-          @click="addTask(newTask)"
-          class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
-        >
-          <PlusIcon class="size-5" />
-        </button>
+      <div>
+        <h1 class="text-2xl font-bold mb-2">Task Tracker</h1>
+        <div class="flex gap-2">
+          <input
+            v-model="newTask"
+            @keyup.enter="addTask(newTask)"
+            placeholder="Task title"
+            class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+          />
+          <button
+            @click="addTask(newTask)"
+            class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
+          >
+            <PlusIcon class="size-5" />
+          </button>
+        </div>
       </div>
       <div class="flex items-center gap-4">
         <!-- Sync status indicator (only shown when logged in) -->
@@ -227,6 +230,80 @@ function formatDate(dateString?: string) {
           </div>
           {{ hideCompleted ? "Show" : "Hide" }} Completed
         </button>
+        <!-- bottom right detailed add button -->
+        <div>
+          <button
+            @click="showDetailedAdd = !showDetailedAdd"
+            class="size-12 bg-linear-to-br from-rose via-iris to-foam text-surface rounded-xl p-2 flex items-center justify-center cursor-pointer transition duration-200 active:scale-90 hover:scale-105"
+          >
+            <PlusIcon
+              class="size-6 transition duration-500"
+              :class="showDetailedAdd ? 'rotate-135' : 'rotate-0'"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed add task modal -->
+    <div v-auto-animate class="relative">
+        <h2 class="text-xl font-semibold mb-3 border-b border-surface pb-2 mt-8">
+          Short-Term Goals
+        </h2>
+      <div v-if="showDetailedAdd" class="flex items-center justify-center">
+        <div
+          class="bg-linear-to-tl from-rose via-iris to-foam rounded-xl p-0.5 w-full"
+        >
+          <div class="bg-base p-6 rounded-xl w-full">
+            <h2 class="text-xl font-semibold mb-4">Add Detailed Task</h2>
+            <input
+              v-model="detailedTitle"
+              type="text"
+              placeholder="Task Title"
+              class="mb-3 bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+            />
+            <textarea
+              v-model="detailedDescription"
+              placeholder="Task Description"
+              class="mb-3 bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+            ></textarea>
+
+            <!-- Date field -->
+            <div class="flex items-center gap-2 mb-3">
+              <CalendarIcon class="size-5 text-subtle" />
+              <input
+                v-model="detailedDate"
+                type="date"
+                class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl w-full"
+              />
+            </div>
+
+            <!-- Time field -->
+            <div class="flex items-center gap-2 mb-3">
+              <ClockIcon class="size-5 text-subtle" />
+              <input
+                v-model="detailedTime"
+                type="time"
+                class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl w-full"
+              />
+            </div>
+
+            <div class="flex justify-end gap-2">
+              <button
+                @click="showDetailedAdd = false"
+                class="px-4 py-2 rounded-xl bg-surface hover:bg-overlay text-text cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                @click="addDetailedTask"
+                class="px-4 py-2 rounded-xl bg-surface hover:bg-overlay text-text cursor-pointer"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -234,6 +311,7 @@ function formatDate(dateString?: string) {
     <ul ref="tasksList" class="mx-auto">
       <li
         v-for="task in filteredTasks"
+        v-if="filteredTasks.length != 0"
         :key="task.id"
         class="flex items-center justify-between p-4 border-b border-surface bg-surface rounded-xl mb-1 transition duration-200 cursor-pointer hover:bg-overlay"
         :class="{
@@ -307,82 +385,10 @@ function formatDate(dateString?: string) {
           </button>
         </div>
       </li>
+      <li v-else class="text-center text-subtle italic mt-4">
+        No tasks found. Add a new task to get started!
+      </li>
     </ul>
-
-    <!-- Detailed add task modal -->
-    <div v-auto-animate="{ origin: 'top' }" class="fixed bottom-4 right-4">
-      <div
-        v-if="showDetailedAdd"
-        class="absolute bottom-18 right-4 flex items-center justify-center"
-      >
-        <div
-          class="bg-linear-to-tl from-rose via-iris to-foam rounded-xl w-80 p-0.5"
-        >
-          <div class="bg-surface p-6 rounded-xl w-full">
-            <h2 class="text-xl font-semibold mb-4">Add Detailed Task</h2>
-            <input
-              v-model="detailedTitle"
-              type="text"
-              placeholder="Task Title"
-              class="mb-3 bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
-            />
-            <textarea
-              v-model="detailedDescription"
-              placeholder="Task Description"
-              class="mb-3 bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
-            ></textarea>
-
-            <!-- Date field -->
-            <div class="flex items-center gap-2 mb-3">
-              <CalendarIcon class="size-5 text-subtle" />
-              <input
-                v-model="detailedDate"
-                type="date"
-                class="bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl w-full"
-              />
-            </div>
-
-            <!-- Time field -->
-            <div class="flex items-center gap-2 mb-3">
-              <ClockIcon class="size-5 text-subtle" />
-              <input
-                v-model="detailedTime"
-                type="time"
-                class="bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl w-full"
-              />
-            </div>
-
-            <div class="flex justify-end gap-2">
-              <button
-                @click="showDetailedAdd = false"
-                class="px-4 py-2 rounded-xl bg-overlay hover:bg-overlay/80 text-text cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                @click="addDetailedTask"
-                class="px-4 py-2 rounded-xl bg-overlay hover:bg-overlay/80 text-text cursor-pointer"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- bottom right detailed add button -->
-      <div class="absolute bottom-4 right-4">
-        <button
-          @click="showDetailedAdd = !showDetailedAdd"
-          class="size-12 bg-linear-to-br from-rose via-iris to-foam text-surface rounded-xl p-2 flex items-center justify-center cursor-pointer transition duration-200 active:scale-90 hover:scale-105"
-        >
-          <PlusIcon
-            class="size-6 transition duration-500"
-            :class="showDetailedAdd ? 'rotate-135' : 'rotate-0'"
-          />
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
