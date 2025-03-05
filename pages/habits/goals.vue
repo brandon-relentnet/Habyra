@@ -7,6 +7,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/vue/24/solid";
 import autoAnimate from "@formkit/auto-animate";
+import { useGoalsStore } from "@/stores/goals";
 
 definePageMeta({
   title: "Goal Tracker",
@@ -15,16 +16,7 @@ definePageMeta({
   layout: "habits",
 });
 
-interface Goal {
-  id: number;
-  title: string;
-  description: string;
-  category: "short" | "long" | "life";
-  targetDate?: string;
-  completed: boolean;
-  createdAt: string;
-}
-
+const goalsStore = useGoalsStore();
 const goalsList = ref<HTMLElement | null>(null);
 const newGoalTitle = ref("");
 const newGoalDescription = ref("");
@@ -33,68 +25,42 @@ const newGoalDate = ref("");
 const showAddGoalForm = ref(false);
 const editingGoalId = ref<number | null>(null);
 
-// Goals data with local storage persistence
-const goalsData = ref<Goal[]>(
-  localStorage.getItem("goals")
-    ? JSON.parse(localStorage.getItem("goals") || "[]")
-    : []
-);
+// Initialize goals store when component mounts
+onMounted(async () => {
+  await goalsStore.initialize();
+
+  if (goalsList.value) {
+    autoAnimate(goalsList.value);
+  }
+});
 
 // Computed properties for filtered goals
-const shortTermGoals = computed(() =>
-  goalsData.value.filter((goal) => goal.category === "short")
-);
-
-const longTermGoals = computed(() =>
-  goalsData.value.filter((goal) => goal.category === "long")
-);
-
-const lifeGoals = computed(() =>
-  goalsData.value.filter((goal) => goal.category === "life")
-);
-
-// Next ID for new goals
-const nextId = computed(() => {
-  const ids = goalsData.value.map((goal) => goal.id);
-  return ids.length > 0 ? Math.max(...ids) + 1 : 1;
-});
+const shortTermGoals = computed(() => goalsStore.shortTermGoals);
+const longTermGoals = computed(() => goalsStore.longTermGoals);
+const lifeGoals = computed(() => goalsStore.lifeGoals);
 
 // Add a new goal
 function addGoal() {
   if (!newGoalTitle.value.trim()) return;
 
-  const now = new Date().toISOString();
-
   if (editingGoalId.value !== null) {
     // Editing existing goal
-    const index = goalsData.value.findIndex(
-      (g) => g.id === editingGoalId.value
-    );
-    if (index !== -1) {
-      goalsData.value[index] = {
-        ...goalsData.value[index],
-        title: newGoalTitle.value,
-        description: newGoalDescription.value,
-        category: newGoalCategory.value,
-        targetDate: newGoalDate.value || undefined,
-      };
-    }
-    editingGoalId.value = null;
-  } else {
-    // Adding new goal
-    goalsData.value.push({
-      id: nextId.value,
+    goalsStore.updateGoal(editingGoalId.value, {
       title: newGoalTitle.value,
       description: newGoalDescription.value,
       category: newGoalCategory.value,
       targetDate: newGoalDate.value || undefined,
-      completed: false,
-      createdAt: now,
     });
+    editingGoalId.value = null;
+  } else {
+    // Adding new goal
+    goalsStore.addGoal(
+      newGoalTitle.value,
+      newGoalDescription.value,
+      newGoalCategory.value,
+      newGoalDate.value || undefined
+    );
   }
-
-  // Save to localStorage
-  localStorage.setItem("goals", JSON.stringify(goalsData.value));
 
   // Reset form
   newGoalTitle.value = "";
@@ -105,7 +71,7 @@ function addGoal() {
 }
 
 // Edit a goal
-function editGoal(goal: Goal) {
+function editGoal(goal: any) {
   editingGoalId.value = goal.id;
   newGoalTitle.value = goal.title;
   newGoalDescription.value = goal.description;
@@ -116,17 +82,12 @@ function editGoal(goal: Goal) {
 
 // Delete a goal
 function deleteGoal(id: number) {
-  goalsData.value = goalsData.value.filter((goal) => goal.id !== id);
-  localStorage.setItem("goals", JSON.stringify(goalsData.value));
+  goalsStore.deleteGoal(id);
 }
 
 // Toggle goal completion
 function toggleComplete(id: number) {
-  const index = goalsData.value.findIndex((goal) => goal.id === id);
-  if (index !== -1) {
-    goalsData.value[index].completed = !goalsData.value[index].completed;
-    localStorage.setItem("goals", JSON.stringify(goalsData.value));
-  }
+  goalsStore.toggleComplete(id);
 }
 
 // Format date for display
@@ -135,12 +96,6 @@ function formatDate(dateString?: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString();
 }
-
-onMounted(() => {
-  if (goalsList.value) {
-    autoAnimate(goalsList.value);
-  }
-});
 </script>
 
 <template>
