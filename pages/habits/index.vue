@@ -1,5 +1,7 @@
 <script setup>
 import { useTasksStore } from "@/stores/tasks";
+import { useGoalsStore } from "@/stores/goals";
+import { useStatisticsStore } from "@/stores/statistics";
 import { computed, ref, onMounted } from "vue";
 import {
   CheckCircleIcon,
@@ -17,26 +19,28 @@ definePageMeta({
 });
 
 const tasksStore = useTasksStore();
+const goalsStore = useGoalsStore();
+const statsStore = useStatisticsStore();
+
+// Initialize stores when component mounts
+onMounted(async () => {
+  await tasksStore.initialize();
+  await goalsStore.initialize();
+  await statsStore.initialize();
+});
+
 const tasks = computed(() => tasksStore.tasks);
 const completedTasks = computed(() => tasks.value.filter(task => task.completed).length);
 
-// Get goals from localStorage
-const goals = computed(() => {
-  const storedGoals = localStorage.getItem("goals") 
-    ? JSON.parse(localStorage.getItem("goals") || "[]") 
-    : [];
-  return storedGoals;
-});
-
+// Get goals from store
+const goals = computed(() => goalsStore.goals);
 const completedGoals = computed(() => goals.value.filter(goal => goal.completed).length);
 
 // Current streak
-const currentStreak = ref(localStorage.getItem("currentStreak") 
-  ? parseInt(localStorage.getItem("currentStreak") || "0") 
-  : 0);
+const currentStreak = computed(() => statsStore.currentStreak);
 
 // Features cards
-const features = [
+const features = computed(() => [
   {
     title: "Tasks",
     description: "Create and manage daily tasks that build positive habits",
@@ -69,7 +73,7 @@ const features = [
     link: "/habits/about",
     stats: "Atomic Habits principles",
   },
-];
+]);
 
 // Quick tips for habit building
 const quickTips = [

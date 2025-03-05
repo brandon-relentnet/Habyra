@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useTasksStore } from "@/stores/tasks";
+import { useGoalsStore } from "@/stores/goals";
+import { useStatisticsStore } from "@/stores/statistics";
 import { 
   ChartBarIcon, 
   CheckCircleIcon, 
@@ -19,110 +21,20 @@ definePageMeta({
 });
 
 const tasksStore = useTasksStore();
-const tasks = computed(() => tasksStore.tasks);
+const goalsStore = useGoalsStore();
+const statsStore = useStatisticsStore();
 
-// Get goals from localStorage
-const goals = computed(() => {
-  const storedGoals = localStorage.getItem("goals") 
-    ? JSON.parse(localStorage.getItem("goals") || "[]") 
-    : [];
-  return storedGoals;
+// Initialize stores when component mounts
+onMounted(async () => {
+  await tasksStore.initialize();
+  await goalsStore.initialize();
+  await statsStore.initialize();
 });
-
-// Track current streak
-const currentStreak = ref(calculateStreak());
-const longestStreak = ref(localStorage.getItem("longestStreak") 
-  ? parseInt(localStorage.getItem("longestStreak") || "0") 
-  : 0);
-
-// When component mounts, update streak info
-onMounted(() => {
-  updateStreakInfo();
-});
-
-// Calculate current streak
-function calculateStreak() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  // Check if any tasks completed today
-  const tasksCompletedToday = tasks.value.some(task => {
-    if (!task.completed) return false;
-    // For demo purposes, we'll consider all completed tasks as part of streak
-    // In a real app, you'd check completion date from server
-    return true;
-  });
-  
-  // Get streak from localStorage
-  const streak = localStorage.getItem("currentStreak") 
-    ? parseInt(localStorage.getItem("currentStreak") || "0") 
-    : 0;
-  
-  // Get last active date
-  const lastActiveDate = localStorage.getItem("lastActiveDate") 
-    ? new Date(localStorage.getItem("lastActiveDate") || "") 
-    : null;
-  
-  // If completed task today, increment streak if yesterday was active
-  if (tasksCompletedToday) {
-    if (!lastActiveDate) {
-      // First time active
-      return 1;
-    }
-    
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    if (
-      lastActiveDate.getDate() === yesterday.getDate() &&
-      lastActiveDate.getMonth() === yesterday.getMonth() &&
-      lastActiveDate.getFullYear() === yesterday.getFullYear()
-    ) {
-      // Yesterday was active, increment streak
-      return streak + 1;
-    } else if (
-      lastActiveDate.getDate() === today.getDate() &&
-      lastActiveDate.getMonth() === today.getMonth() &&
-      lastActiveDate.getFullYear() === today.getFullYear()
-    ) {
-      // Already updated today
-      return streak;
-    } else {
-      // Break in streak, start over
-      return 1;
-    }
-  }
-  
-  // No tasks completed today, return current streak
-  return streak;
-}
-
-// Update streak information
-function updateStreakInfo() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  // Check if any tasks completed today
-  const tasksCompletedToday = tasks.value.some(task => task.completed);
-  
-  if (tasksCompletedToday) {
-    // Update last active date to today
-    localStorage.setItem("lastActiveDate", today.toISOString());
-    
-    // Update current streak
-    const newStreak = calculateStreak();
-    currentStreak.value = newStreak;
-    localStorage.setItem("currentStreak", newStreak.toString());
-    
-    // Update longest streak if needed
-    if (newStreak > longestStreak.value) {
-      longestStreak.value = newStreak;
-      localStorage.setItem("longestStreak", newStreak.toString());
-    }
-  }
-}
 
 // Statistics calculations
+const tasks = computed(() => tasksStore.tasks);
+const goals = computed(() => goalsStore.goals);
+
 const totalTasks = computed(() => tasks.value.length);
 const completedTasks = computed(() => tasks.value.filter(task => task.completed).length);
 const pendingTasks = computed(() => tasks.value.filter(task => !task.completed).length);
@@ -138,26 +50,21 @@ const goalCompletionRate = computed(() =>
   totalGoals.value > 0 ? Math.round((completedGoals.value / totalGoals.value) * 100) : 0
 );
 
-// Weekly progress data (mock data for demo)
-// In a real app, you'd calculate this from actual completion dates
-const weeklyProgress = ref([
-  { day: "Mon", completed: 3 },
-  { day: "Tue", completed: 5 },
-  { day: "Wed", completed: 2 },
-  { day: "Thu", completed: 4 },
-  { day: "Fri", completed: 3 },
-  { day: "Sat", completed: 1 },
-  { day: "Sun", completed: 0 },
-]);
+// Streak information
+const currentStreak = computed(() => statsStore.currentStreak);
+const longestStreak = computed(() => statsStore.longestStreak);
 
-// Time of day statistics (mock data for demo)
-// In a real app, you'd calculate this from actual completion times
-const timeOfDayStats = ref([
-  { time: "Morning", completed: 8 },
-  { time: "Afternoon", completed: 12 },
-  { time: "Evening", completed: 15 },
-  { time: "Night", completed: 5 },
-]);
+// Weekly progress
+const weeklyProgress = computed(() => statsStore.weeklyProgress);
+
+// Week-over-week change
+const weekOverWeekChange = computed(() => statsStore.weekOverWeekChange);
+
+// Time of day statistics
+const timeOfDayStats = computed(() => statsStore.timeOfDayStats);
+
+// Most productive day
+const mostProductiveDay = computed(() => statsStore.mostProductiveDay);
 
 // Calculate max value for chart scaling
 const maxCompleted = computed(() => {
@@ -170,17 +77,6 @@ const maxCompleted = computed(() => {
 function getBarHeight(value: number) {
   return (value / maxCompleted.value) * 100;
 }
-
-// Most productive day (mock data for demo)
-const mostProductiveDay = computed(() => {
-  const max = weeklyProgress.value.reduce((prev, current) => 
-    (prev.completed > current.completed) ? prev : current
-  );
-  return max.day;
-});
-
-// Calculate week-over-week change (mock data for demo)
-const weekOverWeekChange = ref(12); // Percentage
 </script>
 
 <template>

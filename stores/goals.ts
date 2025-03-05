@@ -69,9 +69,30 @@ export const useGoalsStore = defineStore("goals", {
       // If logged in, sync with server
       if (this.isLoggedIn) {
         await this.fetchGoalsFromServer();
+
+        // After fetching from server, sync any local goals that weren't on the server
+        await this.syncLocalGoalsToServer();
       }
 
       this.isInitialized = true;
+    },
+
+    // Sync local goals to server after login
+    async syncLocalGoalsToServer() {
+      // Find all goals that haven't been synced
+      const unsynced = this.goals.filter((goal) => !goal.synced);
+
+      for (const goal of unsynced) {
+        try {
+          await this.saveGoalToServer(goal);
+        } catch (error) {
+          console.error(`Failed to sync goal ${goal.id} to server:`, error);
+          // Add to sync queue for retry
+          if (!this.syncQueue.includes(goal.id)) {
+            this.syncQueue.push(goal.id);
+          }
+        }
+      }
     },
 
     // Fetch goals from server
@@ -86,20 +107,28 @@ export const useGoalsStore = defineStore("goals", {
         const data = await response.json();
 
         if (data.success && data.goals) {
-          // Find the highest ID to set nextId correctly
-          let highestId = -1;
+          // Find the highest ID across both local and server goals
+          let highestId = this.nextId - 1;
 
-          data.goals.forEach((goal: Goal) => {
+          // Get all local goals that aren't yet synced
+          const localUnsyncedGoals = this.goals.filter((goal) => !goal.synced);
+
+          // Start with server goals
+          const mergedGoals = [...data.goals];
+
+          // Add local unsynced goals
+          localUnsyncedGoals.forEach((goal) => {
             if (goal.id > highestId) {
               highestId = goal.id;
             }
+            mergedGoals.push(goal);
           });
 
           this.nextId = highestId + 1;
-          this.goals = data.goals;
+          this.goals = mergedGoals;
 
-          // Clean up localStorage once data is successfully fetched from server
-          localStorage.removeItem("goals");
+          // Don't remove from localStorage yet since we still need to sync local goals
+          // That will happen in syncLocalGoalsToServer
         }
       } catch (error) {
         console.error("Error fetching goals:", error);
@@ -134,6 +163,9 @@ export const useGoalsStore = defineStore("goals", {
           if (index !== -1) {
             this.goals[index].synced = true;
             this.goals[index].serverId = data.goalId;
+
+            // Update localStorage with the updated synced status
+            this.persistToLocalStorage();
           }
         }
       } catch (error) {
@@ -151,6 +183,12 @@ export const useGoalsStore = defineStore("goals", {
         const { loggedIn } = useUserSession();
         if (!loggedIn.value) return;
 
+        // If goal is not synced yet, save it first instead of updating
+        if (!goal.synced) {
+          await this.saveGoalToServer(goal);
+          return;
+        }
+
         const response = await fetch(`/api/goals/${goal.id}`, {
           method: "PUT",
           headers: {
@@ -167,6 +205,9 @@ export const useGoalsStore = defineStore("goals", {
         const index = this.goals.findIndex((g) => g.id === goal.id);
         if (index !== -1) {
           this.goals[index].synced = true;
+
+          // Update localStorage with the updated synced status
+          this.persistToLocalStorage();
         }
       } catch (error) {
         console.error("Error updating goal:", error);
@@ -182,6 +223,11 @@ export const useGoalsStore = defineStore("goals", {
       try {
         const { loggedIn } = useUserSession();
         if (!loggedIn.value) return;
+
+        const goal = this.goals.find((g) => g.id === id);
+
+        // If the goal was never synced, no need to delete from server
+        if (!goal || !goal.synced) return;
 
         const response = await fetch(`/api/goals/${id}`, {
           method: "DELETE",

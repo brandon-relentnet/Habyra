@@ -14,6 +14,11 @@ interface TimeStats {
   completed: number;
 }
 
+interface WeeklyProgressItem {
+  day: string;
+  completed: number;
+}
+
 export const useStatisticsStore = defineStore("statistics", {
   state: () => ({
     currentStreak: 0,
@@ -28,6 +33,14 @@ export const useStatisticsStore = defineStore("statistics", {
     ] as TimeStats[],
     isInitialized: false,
     syncQueue: [] as string[],
+    // Add a property to cache previous week total
+    _previousWeekTotal: 0,
+    // Add a property to cache weekly progress
+    _weeklyProgress: [] as WeeklyProgressItem[],
+    // Cache for week-over-week change
+    _weekOverWeekChange: 0,
+    // Cache for most productive day
+    _mostProductiveDay: "None",
   }),
   getters: {
     isLoggedIn() {
@@ -39,10 +52,14 @@ export const useStatisticsStore = defineStore("statistics", {
         return false;
       }
     },
-    weeklyProgress(): { day: string; completed: number }[] {
+    weeklyProgress(state): WeeklyProgressItem[] {
+      if (state._weeklyProgress.length > 0) {
+        return state._weeklyProgress;
+      }
+
       const today = new Date();
       const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const result = [];
+      const result: WeeklyProgressItem[] = [];
 
       // Get data for the last 7 days
       for (let i = 6; i >= 0; i--) {
@@ -50,7 +67,9 @@ export const useStatisticsStore = defineStore("statistics", {
         date.setDate(today.getDate() - i);
         const dateString = date.toISOString().split("T")[0];
 
-        const dayLog = this.activityLogs.find((log) => log.date === dateString);
+        const dayLog = state.activityLogs.find(
+          (log) => log.date === dateString
+        );
         const dayIndex = date.getDay(); // 0 is Sunday, 6 is Saturday
 
         result.push({
@@ -59,23 +78,17 @@ export const useStatisticsStore = defineStore("statistics", {
         });
       }
 
+      // Cache the result
+      state._weeklyProgress = result;
       return result;
     },
-    weekOverWeekChange(): number {
-      // Calculate week-over-week change in task completion
-      const thisWeek = this.weeklyProgress.reduce(
-        (sum, day) => sum + day.completed,
-        0
-      );
+    // Helper getter to calculate previous week total
+    previousWeekTotal(state): number {
+      // If already calculated, return cached value
+      if (state._previousWeekTotal !== 0) {
+        return state._previousWeekTotal;
+      }
 
-      // Get previous week's data
-      const today = new Date();
-      const prevWeekTotal = this.getPreviousWeekTotal;
-
-      if (prevWeekTotal === 0) return 0;
-      return Math.round(((thisWeek - prevWeekTotal) / prevWeekTotal) * 100);
-    },
-    getPreviousWeekTotal(): number {
       const today = new Date();
       let prevWeekTotal = 0;
 
@@ -85,20 +98,57 @@ export const useStatisticsStore = defineStore("statistics", {
         date.setDate(today.getDate() - i);
         const dateString = date.toISOString().split("T")[0];
 
-        const dayLog = this.activityLogs.find((log) => log.date === dateString);
+        const dayLog = state.activityLogs.find(
+          (log) => log.date === dateString
+        );
         if (dayLog) {
           prevWeekTotal += dayLog.completedTasks;
         }
       }
 
+      // Cache the result
+      state._previousWeekTotal = prevWeekTotal;
       return prevWeekTotal;
     },
-    mostProductiveDay() {
+    weekOverWeekChange(state): number {
+      // If already calculated, return cached value
+      if (state._weekOverWeekChange !== 0) {
+        return state._weekOverWeekChange;
+      }
+
+      // Calculate current week total
+      const thisWeek = this.weeklyProgress.reduce(
+        (sum, day) => sum + day.completed,
+        0
+      );
+
+      // Get previous week's data
+      const prevWeekTotal = this.previousWeekTotal;
+
+      if (prevWeekTotal === 0) return 0;
+      const change = Math.round(
+        ((thisWeek - prevWeekTotal) / prevWeekTotal) * 100
+      );
+
+      // Cache the result
+      state._weekOverWeekChange = change;
+      return change;
+    },
+    mostProductiveDay(state): string {
+      // If already determined, return cached value
+      if (state._mostProductiveDay !== "None") {
+        return state._mostProductiveDay;
+      }
+
       if (this.weeklyProgress.length === 0) return "None";
 
-      return this.weeklyProgress().reduce((most, current) =>
+      const mostProductive = this.weeklyProgress.reduce((most, current) =>
         most.completed > current.completed ? most : current
       ).day;
+
+      // Cache the result
+      state._mostProductiveDay = mostProductive;
+      return mostProductive;
     },
   },
   actions: {
@@ -131,8 +181,27 @@ export const useStatisticsStore = defineStore("statistics", {
       if (currentStreak) this.currentStreak = parseInt(currentStreak);
       if (longestStreak) this.longestStreak = parseInt(longestStreak);
       if (lastActiveDate) this.lastActiveDate = lastActiveDate;
-      if (activityLogs) this.activityLogs = JSON.parse(activityLogs);
-      if (timeOfDayStats) this.timeOfDayStats = JSON.parse(timeOfDayStats);
+      if (activityLogs) {
+        try {
+          this.activityLogs = JSON.parse(activityLogs);
+        } catch (e) {
+          console.error("Error parsing activity logs:", e);
+          this.activityLogs = [];
+        }
+      }
+      if (timeOfDayStats) {
+        try {
+          this.timeOfDayStats = JSON.parse(timeOfDayStats);
+        } catch (e) {
+          console.error("Error parsing time of day stats:", e);
+          this.timeOfDayStats = [
+            { time: "Morning", completed: 0 },
+            { time: "Afternoon", completed: 0 },
+            { time: "Evening", completed: 0 },
+            { time: "Night", completed: 0 },
+          ];
+        }
+      }
     },
 
     // Save data to localStorage
@@ -164,6 +233,12 @@ export const useStatisticsStore = defineStore("statistics", {
           this.lastActiveDate = data.lastActiveDate;
           this.activityLogs = data.activityLogs;
           this.timeOfDayStats = data.timeOfDayStats;
+
+          // Reset cached values
+          this._previousWeekTotal = 0;
+          this._weeklyProgress = [];
+          this._weekOverWeekChange = 0;
+          this._mostProductiveDay = "None";
 
           // Clear localStorage once data is synced from server
           this.clearLocalStorageStats();
@@ -274,6 +349,12 @@ export const useStatisticsStore = defineStore("statistics", {
         // Update time of day stats
         this.updateTimeOfDayStats();
 
+        // Reset cached values since data has changed
+        this._previousWeekTotal = 0;
+        this._weeklyProgress = [];
+        this._weekOverWeekChange = 0;
+        this._mostProductiveDay = "None";
+
         // Persist to local storage
         this.persistToLocalStorage();
 
@@ -334,26 +415,6 @@ export const useStatisticsStore = defineStore("statistics", {
       if (index !== -1) {
         this.timeOfDayStats[index].completed += 1;
       }
-    },
-
-    // Calculate previous week's task completion total
-    getPreviousWeekTotal() {
-      const today = new Date();
-      let prevWeekTotal = 0;
-
-      // Get dates for previous week (7-13 days ago)
-      for (let i = 13; i >= 7; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const dateString = date.toISOString().split("T")[0];
-
-        const dayLog = this.activityLogs.find((log) => log.date === dateString);
-        if (dayLog) {
-          prevWeekTotal += dayLog.completedTasks;
-        }
-      }
-
-      return prevWeekTotal;
     },
   },
   persist: true,
