@@ -14,6 +14,13 @@ import {
   ClockIcon,
 } from "@heroicons/vue/24/solid";
 
+definePageMeta({
+  title: "Task Tracker",
+  description:
+    "Track and build positive habits with powerful habit-forming techniques.",
+  layout: "habits",
+});
+
 interface Task {
   id: number;
   title: string;
