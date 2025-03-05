@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 export interface Task {
   id: number;
   title: string;
+  description: string;
   completed: boolean;
   favorited: boolean;
 }
@@ -15,10 +16,11 @@ export const useTasksStore = defineStore("tasks", {
     hideCompleted: false,
   }),
   actions: {
-    addTask(taskTitle: string) {
+    addTask(taskTitle: string, taskDescription: string) {
       this.tasks.push({
         id: this.nextId++,
         title: taskTitle,
+        description: taskDescription,
         completed: false,
         favorited: false,
       });

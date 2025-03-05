@@ -9,28 +9,42 @@ import {
   PlusIcon,
   EyeIcon,
   EyeSlashIcon,
+  CheckCircleIcon,
 } from "@heroicons/vue/24/solid";
 
 interface Task {
   id: number;
   title: string;
+  description?: string;
   completed: boolean;
   favorited: boolean;
 }
 
 const tasksList = ref<HTMLElement | null>(null);
-const newTask = ref<string>("");
+const newTask = ref<string>(""); // Quick add input
+const showDetailedAdd = ref<boolean>(false);
+const detailedTitle = ref<string>("");
+const detailedDescription = ref<string>("");
+
 const tasksStore = useTasksStore();
 const draggedTaskId = ref<number | null>(null);
 
 const tasks = computed<Task[]>(() => tasksStore.tasks);
-
 const hideCompleted = computed(() => tasksStore.hideCompleted);
 
-function addTask(taskTitle: string) {
+function addTask(taskTitle: string, taskDescription: string = "") {
   if (taskTitle.trim()) {
-    tasksStore.addTask(taskTitle);
-    newTask.value = ""; // Clear input after adding
+    tasksStore.addTask(taskTitle, taskDescription);
+    newTask.value = "";
+  }
+}
+
+function addDetailedTask() {
+  if (detailedTitle.value.trim()) {
+    tasksStore.addTask(detailedTitle.value, detailedDescription.value);
+    detailedTitle.value = "";
+    detailedDescription.value = "";
+    showDetailedAdd.value = false;
   }
 }
 
@@ -56,7 +70,6 @@ function toggleFavorite(id: number) {
   tasksStore.toggleFavorite(id);
 }
 
-// Drag and drop functionality remains unchanged
 function onDragStart(e: DragEvent, id: number) {
   draggedTaskId.value = id;
   if (!e.dataTransfer) return;
@@ -72,7 +85,6 @@ function onDragStart(e: DragEvent, id: number) {
     liElement.classList.add("is-dragging");
   }
 
-  // Store the ID as string in dataTransfer
   e.dataTransfer.setData("text/plain", id.toString());
 }
 
@@ -132,7 +144,22 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-base text-text pb-16">
-    <div class="flex justify-between items-center mb-6">
+    <!-- Quick add section -->
+    <div class="flex justify-between items-end mb-4">
+      <div class="flex gap-2">
+        <input
+          v-model="newTask"
+          @keyup.enter="addTask(newTask)"
+          placeholder="Quick add a new task"
+          class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+        />
+        <button
+          @click="addTask(newTask)"
+          class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
+        >
+          <PlusIcon class="size-5" />
+        </button>
+      </div>
       <button
         @click="toggleHideCompleted"
         class="hover:bg-surface rounded-xl px-4 py-2 cursor-pointer transition duration-200 flex items-center space-x-2 text-subtle hover:text-text font-semibold whitespace-nowrap"
@@ -145,28 +172,40 @@ onMounted(() => {
       </button>
     </div>
 
-    <ul ref="tasksList" class="mt-8 w-2/3 mx-auto">
+    <!-- Tasks list -->
+    <ul ref="tasksList" class="mx-auto">
       <li
         v-for="task in filteredTasks"
         :key="task.id"
-        class="flex items-center justify-between p-4 border-b border-surface bg-surface rounded-xl mb-1 transition duration-200"
+        class="flex items-center justify-between p-4 border-b border-surface bg-surface rounded-xl mb-1 transition duration-200 cursor-pointer hover:bg-overlay"
         :class="{
           'is-dragging': draggedTaskId === task.id,
           'shadow-md': draggedTaskId === task.id,
         }"
         @dragover="onDragOver($event)"
         @drop="onDrop($event, task.id)"
+        @click="toggleComplete(task.id)"
       >
-        <div class="flex items-center flex-1">
-          <input
-            type="checkbox"
-            :checked="task.completed"
-            @change="toggleComplete(task.id)"
-            class="mr-4"
+        <div class="flex items-center gap-x-2 mr-2">
+          <CheckCircleIcon
+            @click="toggleComplete(task.id)"
+            class="size-6 cursor-pointer transition duration-200"
+            :class="task.completed ? 'text-foam' : 'text-subtle'"
           />
-          <span :class="{ 'line-through': task.completed }">
-            {{ task.title }}
-          </span>
+          <div class="flex flex-col">
+            <span
+              :class="{ 'line-through': task.completed }"
+              class="text-text transition duration-200 font-semibold"
+            >
+              {{ task.title }}
+            </span>
+            <p
+              :class="{ 'line-through': task.completed }"
+              class="transition duration-200 italic font-serif text-subtle break-all"
+            >
+              {{ task.description }}
+            </p>
+          </div>
         </div>
         <div class="flex gap-2 items-center">
           <!-- Drag handle -->
@@ -196,19 +235,57 @@ onMounted(() => {
         </div>
       </li>
     </ul>
-    <div class="fixed bottom-4 right-4 flex items-center gap-2 w-100">
-      <input
-        v-model="newTask"
-        @keyup.enter="addTask(newTask)"
-        placeholder="Quick add a new task"
-        class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
-      />
-      <button
-        @click="addTask(newTask)"
-        class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
+
+    <!-- Detailed add task modal -->
+    <div v-auto-animate="{ origin: 'top' }" class="fixed bottom-4 right-4">
+      <div
+        v-if="showDetailedAdd"
+        class="absolute bottom-18 right-4 flex items-center justify-center"
       >
-        <PlusIcon class="size-5" />
-      </button>
+        <div class="bg-linear-to-tl from-rose via-iris to-foam rounded-xl w-80 p-0.5">
+          <div class="bg-surface p-6 rounded-xl w-full">
+            <h2 class="text-xl font-semibold mb-4">Add Detailed Task</h2>
+            <input
+              v-model="detailedTitle"
+              type="text"
+              placeholder="Task Title"
+              class="mb-3 bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+            />
+            <textarea
+              v-model="detailedDescription"
+              placeholder="Task Description"
+              class="mb-3 bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+            ></textarea>
+            <div class="flex justify-end gap-2">
+              <button
+                @click="showDetailedAdd = false"
+                class="px-4 py-2 rounded-xl bg-overlay hover:bg-overlay/80 text-text cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                @click="addDetailedTask"
+                class="px-4 py-2 rounded-xl bg-overlay hover:bg-overlay/80 text-text cursor-pointer"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bottom right detailed add button -->
+      <div class="absolute bottom-4 right-4">
+        <button
+          @click="showDetailedAdd = !showDetailedAdd"
+          class="size-12 bg-linear-to-br from-rose via-iris to-foam text-surface rounded-xl p-2 flex items-center justify-center cursor-pointer transition duration-200 active:scale-90 hover:scale-105"
+        >
+          <PlusIcon
+            class="size-6 transition duration-500"
+            :class="showDetailedAdd ? 'rotate-135' : 'rotate-0'"
+          />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -225,6 +302,6 @@ onMounted(() => {
 }
 
 .drag-handle {
-  touch-action: none; /* Prevents scrolling on mobile when dragging */
+  touch-action: none;
 }
 </style>
