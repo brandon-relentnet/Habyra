@@ -94,7 +94,7 @@ async function register() {
 </script>
 
 <template>
-  <section class="container mx-auto p-4 text-text min-h-screen pt-40">
+  <section class="p-4 text-text min-h-screen flex flex-col items-center">
     <h1 class="text-2xl font-bold mb-4">Create an Account</h1>
     <p class="text-subtle italic font-serif mb-6">
       Sign up to start your health journey with us
@@ -107,7 +107,7 @@ async function register() {
       {{ formErrors.general }}
     </div>
 
-    <form @submit.prevent="register" class="flex flex-col gap-4 max-w-sm">
+    <form @submit.prevent="register" class="flex flex-col gap-4 max-w-sm w-sm">
       <div>
         <input
           v-model="formData.name"
@@ -172,7 +172,7 @@ async function register() {
       <div class="text-center mt-4">
         <p class="text-subtle">
           Already have an account?
-          <NuxtLink to="/login" class="text-foam hover:underline"
+          <NuxtLink to="/login" class="colored-text hover:underline"
             >Login</NuxtLink
           >
         </p>

@@ -1,22 +1,24 @@
 // store/tasks.ts
 import { defineStore } from "pinia";
 
-let nextId = 0;
+export interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
+  favorited: boolean;
+}
 
 export const useTasksStore = defineStore("tasks", {
   state: () => ({
-    tasks: [] as {
-      id: number;
-      title: string;
-      completed: boolean;
-      favorited: boolean;
-    }[],
+    tasks: [] as Task[],
+    nextId: 0,
+    hideCompleted: false,
   }),
   actions: {
-    addTask(task: string) {
+    addTask(taskTitle: string) {
       this.tasks.push({
-        id: nextId++,
-        title: task,
+        id: this.nextId++,
+        title: taskTitle,
         completed: false,
         favorited: false,
       });
@@ -41,17 +43,18 @@ export const useTasksStore = defineStore("tasks", {
     },
     clearAll() {
       this.tasks = [];
-      nextId = 0;
+      this.nextId = 0;
     },
     reorderTask(draggedId: number, targetIndex: number) {
       const draggedIndex = this.tasks.findIndex(
         (task) => task.id === draggedId
       );
       if (draggedIndex === -1) return;
-
       const [draggedTask] = this.tasks.splice(draggedIndex, 1);
-
       this.tasks.splice(targetIndex, 0, draggedTask);
+    },
+    toggleHideCompleted() {
+      this.hideCompleted = !this.hideCompleted;
     },
   },
   persist: true,

@@ -1,25 +1,21 @@
 <script setup>
-definePageMeta({
-  middleware: ["authenticated"],
-});
-
-const { user, clear: clearSession } = useUserSession();
-
-async function logout() {
-  await clearSession();
-  await navigateTo("/registration");
-}
+const { loggedIn } = useUserSession();
 </script>
 
 <template>
   <div class="min-h-screen bg-base text-text pb-16">
-    <header class="bg-surface p-6">
-      <div class="container mx-auto">
-        <h1 class="text-2xl font-bold">Dashboard</h1>
-        <p class="text-subtle italic font-serif">Welcome to your dashboard</p>
+      <div v-if="!loggedIn" class="p-6 text-center">
+        <p class="mb-3">Please log in to view and edit your personal dashboard.</p>
+        <NuxtLink
+          to="/login"
+          class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium gap-2 cursor-pointer transition duration-200 inline-block"
+        >
+          Login to your account
+        </NuxtLink>
       </div>
-    </header>
-    <h1>Welcome {{ user.name }}</h1>
-    <button @click="logout">Logout</button>
+      <div v-else>
+        <h2 class="text-2xl font-semibold mb-2">Dashboard</h2>
+
+      </div>
   </div>
 </template>

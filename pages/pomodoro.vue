@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount, watch, computed } from "vue";
+import { onMounted, watch, computed } from "vue";
 import { usePomodoroStore } from "~/stores/pomodoroStore";
 import { storeToRefs } from "pinia";
 
@@ -7,11 +7,11 @@ import { storeToRefs } from "pinia";
 // Only statistics are restricted to logged-in users
 
 // Get user session
-const { user, loggedIn } = useUserSession();
+const { loggedIn } = useUserSession();
 
 // Initialize pomodoro store
 const pomodoroStore = usePomodoroStore();
-const { timerState, formattedTime, settings } = storeToRefs(pomodoroStore);
+const { timerState, formattedTime } = storeToRefs(pomodoroStore);
 
 // Set up page title
 watch([formattedTime, timerState], () => {
@@ -55,53 +55,42 @@ const statusMessage = computed(() => {
 
 <template>
   <div class="min-h-screen bg-base text-text pb-16">
-    <header class="bg-surface p-6">
-      <div class="container mx-auto">
-        <h1 class="text-2xl font-bold">Pomodoro Timer</h1>
-        <p class="text-subtle italic font-serif">
-          Boost productivity with focused work sessions and regular breaks
-        </p>
-      </div>
-    </header>
+    <!-- Main Timer Section -->
+    <section class="max-w-2xl mx-auto mb-10">
+      <div class="p-8">
+        <!-- Timer Display -->
+        <div class="text-center mb-8">
+          <PomodoroTimerDisplay />
 
-    <main class="container mx-auto px-4 py-8">
-      <!-- Main Timer Section -->
-      <section class="max-w-2xl mx-auto mb-10">
-        <div class="p-8">
-          <!-- Timer Display -->
-          <div class="text-center mb-8">
-            <PomodoroTimerDisplay />
-
-            <!-- Current Status -->
-            <div class="mt-4 text-subtle italic font-serif">
-              <p>{{ statusMessage }}</p>
-            </div>
-          </div>
-
-          <!-- Timer Controls -->
-          <PomodoroControls />
-        </div>
-      </section>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-        <!-- Settings Section -->
-        <PomodoroSettings />
-
-        <!-- Statistics Section -->
-        <PomodoroStatistics v-if="loggedIn" />
-        <div v-else class="p-6">
-          <h2 class="text-xl font-semibold mb-4">Statistics</h2>
-          <div class="bg-overlay/30 p-6 rounded-xl text-center">
-            <p class="mb-3">Please log in to track and view your statistics.</p>
-            <NuxtLink
-              to="/login"
-              class="inline-block px-4 py-2 bg-overlay hover:bg-overlay/80 rounded-xl"
-            >
-              Login to your account
-            </NuxtLink>
+          <!-- Current Status -->
+          <div class="mt-4 text-subtle italic font-serif">
+            <p>{{ statusMessage }}</p>
           </div>
         </div>
+
+        <!-- Timer Controls -->
+        <PomodoroControls />
       </div>
-    </main>
+    </section>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+      <!-- Settings Section -->
+      <PomodoroSettings />
+
+      <!-- Statistics Section -->
+      <PomodoroStatistics v-if="loggedIn" />
+      <div v-else class="p-6">
+        <h2 class="text-xl font-semibold mb-4">Statistics</h2>
+        <div class="bg-overlay/30 p-6 rounded-xl text-center">
+          <p class="mb-3">Please log in to track and view your statistics.</p>
+          <NuxtLink
+            to="/login"
+            class="inline-block px-4 py-2 bg-overlay hover:bg-overlay/80 rounded-xl"
+          >
+            Login to your account
+          </NuxtLink>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

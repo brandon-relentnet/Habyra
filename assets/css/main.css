@@ -36,6 +36,10 @@
     --color-highlight-high: #cecacd;
 }
 
+.colored-text {
+    @apply text-transparent bg-clip-text bg-linear-to-r from-rose via-iris to-foam;
+}
+
 html {
     background-color: var(--color-base);
 }

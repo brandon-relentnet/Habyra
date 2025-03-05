@@ -19,12 +19,12 @@ async function login() {
 </script>
 
 <template>
-  <section class="container mx-auto p-4 text-text min-h-screen pt-40">
+  <section class="p-4 text-text min-h-screen flex flex-col items-center">
     <h1 class="text-2xl font-bold mb-4">Login</h1>
     <p class="text-subtle italic font-serif mb-6">
       Enter your email and password to login
     </p>
-    <form @submit.prevent="login" class="flex flex-col gap-4 max-w-sm">
+    <form @submit.prevent="login" class="flex flex-col gap-4 max-w-sm w-sm">
       <input
         v-model="credentials.email"
         type="email"
@@ -44,6 +44,14 @@ async function login() {
       >
         Login
       </button>
+      <div class="text-center mt-4">
+        <p class="text-subtle">
+          Don't have an account?
+          <NuxtLink to="/registration" class="colored-text hover:underline"
+            >Register</NuxtLink
+          >
+        </p>
+      </div>
     </form>
   </section>
 </template>

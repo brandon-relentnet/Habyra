@@ -140,13 +140,6 @@ export default {
 
 <template>
   <div class="min-h-screen bg-base text-text">
-    <header class="bg-surface p-6">
-      <div class="container mx-auto">
-        <h1 class="text-2xl font-semibold">{{ appTitle }}</h1>
-        <p class="text-subtle italic font-serif">{{ appSubtitle }}</p>
-      </div>
-    </header>
-
     <main class="container mx-auto px-4 py-8">
       <!-- App Introduction -->
       <section class="mb-12 text-center">

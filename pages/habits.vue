@@ -1,5 +1,4 @@
-<!-- Template.vue -->
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
 import { useTasksStore } from "@/stores/tasks";
 import autoAnimate from "@formkit/auto-animate";
@@ -7,122 +6,120 @@ import {
   ArrowsUpDownIcon,
   StarIcon,
   BackspaceIcon,
+  PlusIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/vue/24/solid";
 
-const tasksList = ref(null);
-const newTask = ref("");
+interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
+  favorited: boolean;
+}
+
+const tasksList = ref<HTMLElement | null>(null);
+const newTask = ref<string>("");
 const tasksStore = useTasksStore();
-const draggedTaskId = ref(null);
+const draggedTaskId = ref<number | null>(null);
 
-const tasks = computed(() => tasksStore.tasks);
+const tasks = computed<Task[]>(() => tasksStore.tasks);
 
-function addTask(task) {
-  if (task.trim()) {
-    tasksStore.addTask(task);
+const hideCompleted = computed(() => tasksStore.hideCompleted);
+
+function addTask(taskTitle: string) {
+  if (taskTitle.trim()) {
+    tasksStore.addTask(taskTitle);
     newTask.value = ""; // Clear input after adding
   }
 }
 
-function removeTask(id) {
+const filteredTasks = computed(() =>
+  hideCompleted.value
+    ? tasks.value.filter((task) => !task.completed)
+    : tasks.value
+);
+
+const toggleHideCompleted = () => {
+  tasksStore.toggleHideCompleted();
+};
+
+function removeTask(id: number) {
   tasksStore.removeTask(id);
 }
 
-function toggleComplete(id) {
+function toggleComplete(id: number) {
   tasksStore.toggleComplete(id);
 }
 
-function toggleFavorite(id) {
+function toggleFavorite(id: number) {
   tasksStore.toggleFavorite(id);
 }
 
-// Drag and drop functionality
-function onDragStart(e, id) {
+// Drag and drop functionality remains unchanged
+function onDragStart(e: DragEvent, id: number) {
   draggedTaskId.value = id;
+  if (!e.dataTransfer) return;
+
   e.dataTransfer.effectAllowed = "move";
 
-  // Create a ghost image of the entire list item
-  let element = e.target;
-  while (element && element.tagName !== "LI") {
-    element = element.parentElement;
-  }
-
-  if (element) {
-    // Set the drag image to be the entire list item
-    const rect = element.getBoundingClientRect();
+  const liElement = (e.currentTarget as HTMLElement).closest("li");
+  if (liElement) {
+    const rect = liElement.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
-
-    e.dataTransfer.setDragImage(element, offsetX, offsetY);
-    element.classList.add("is-dragging");
+    e.dataTransfer.setDragImage(liElement, offsetX, offsetY);
+    liElement.classList.add("is-dragging");
   }
 
-  // Store the ID in dataTransfer
-  e.dataTransfer.setData("text/plain", id);
+  // Store the ID as string in dataTransfer
+  e.dataTransfer.setData("text/plain", id.toString());
 }
 
-function onDragEnd(e) {
-  // Find the parent li element and remove the dragging class
-  let element = e.target;
-  while (element && element.tagName !== "LI") {
-    element = element.parentElement;
+function onDragEnd(e: DragEvent) {
+  const liElement = (e.currentTarget as HTMLElement).closest("li");
+  if (liElement) {
+    liElement.classList.remove("is-dragging");
   }
-
-  if (element) {
-    element.classList.remove("is-dragging");
-  }
-
-  // Clear drag state
   draggedTaskId.value = null;
-
-  // Remove drop-target class from all items
   document.querySelectorAll(".drop-target").forEach((el) => {
     el.classList.remove("drop-target");
   });
 }
 
-function onDragOver(e) {
-  e.preventDefault(); // Necessary to allow dropping
+function onDragOver(e: DragEvent) {
+  e.preventDefault();
+  if (!e.dataTransfer) return;
+
   e.dataTransfer.dropEffect = "move";
 
-  // Find the parent li element to indicate drop target
-  let element = e.target;
-  while (element && element.tagName !== "LI") {
-    element = element.parentElement;
-  }
-
-  if (element && !element.classList.contains("is-dragging")) {
-    // Remove drop-target class from all items first
+  const liElement = e.currentTarget as HTMLElement;
+  if (liElement && !liElement.classList.contains("is-dragging")) {
     document.querySelectorAll(".drop-target").forEach((el) => {
       el.classList.remove("drop-target");
     });
-
-    // Add drop-target class to the current element
-    element.classList.add("drop-target");
+    liElement.classList.add("drop-target");
   }
 }
 
-function onDrop(e, targetId) {
+function onDrop(e: DragEvent, targetId: number) {
   e.preventDefault();
-
-  // Remove drop-target class from all items
+  const liElement = e.currentTarget as HTMLElement;
+  liElement.classList.remove("drop-target");
   document.querySelectorAll(".drop-target").forEach((el) => {
     el.classList.remove("drop-target");
   });
 
-  // Get dragged ID
   const draggedId = draggedTaskId.value;
-
-  // Don't do anything if dropping on the same item
   if (draggedId === targetId) return;
 
-  // Get the indices of the dragged and target tasks
   const draggedTaskIndex = tasks.value.findIndex(
     (task) => task.id === draggedId
   );
   const targetTaskIndex = tasks.value.findIndex((task) => task.id === targetId);
 
   if (draggedTaskIndex !== -1 && targetTaskIndex !== -1) {
-    tasksStore.reorderTask(draggedId, targetTaskIndex);
+    tasksStore.reorderTask(draggedId!, targetTaskIndex);
   }
 }
 
@@ -135,31 +132,22 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-base text-text pb-16">
-    <header class="bg-surface p-6 mb-20">
-      <div class="container mx-auto">
-        <h1 class="text-2xl font-bold">Habits</h1>
-        <p class="text-subtle italic font-serif">
-          Track your daily habits and routines
-        </p>
-      </div>
-    </header>
-
-    <input
-      v-model="newTask"
-      @keyup.enter="addTask(newTask)"
-      placeholder="Add a new habit"
-      class="block w-full p-4 bg-surface border-b border-surface focus:outline-none focus:border-primary"
-    />
-    <button
-      @click="addTask(newTask)"
-      class="block w-full p-4 bg-primary text-white"
-    >
-      Add Habit
-    </button>
+    <div class="flex justify-between items-center mb-6">
+      <button
+        @click="toggleHideCompleted"
+        class="hover:bg-surface rounded-xl px-4 py-2 cursor-pointer transition duration-200 flex items-center space-x-2 text-subtle hover:text-text font-semibold whitespace-nowrap"
+      >
+        <div class="inline-block mr-2" v-auto-animate>
+          <EyeIcon v-if="!hideCompleted" class="size-6 mt-0.5" />
+          <EyeSlashIcon v-else class="size-6 mt-0.5" />
+        </div>
+        {{ hideCompleted ? "Show" : "Hide" }} Completed
+      </button>
+    </div>
 
     <ul ref="tasksList" class="mt-8 w-2/3 mx-auto">
       <li
-        v-for="task in tasks"
+        v-for="task in filteredTasks"
         :key="task.id"
         class="flex items-center justify-between p-4 border-b border-surface bg-surface rounded-xl mb-1 transition duration-200"
         :class="{
@@ -185,7 +173,6 @@ onMounted(() => {
           <div
             class="drag-handle p-1 rounded text-subtle hover:text-text active:text-foam cursor-grab active:cursor-grabbing transition duration-200"
             draggable="true"
-            data-id="taskItem"
             @dragstart="onDragStart($event, task.id)"
             @dragend="onDragEnd($event)"
           >
@@ -209,6 +196,20 @@ onMounted(() => {
         </div>
       </li>
     </ul>
+    <div class="fixed bottom-4 right-4 flex items-center gap-2 w-100">
+      <input
+        v-model="newTask"
+        @keyup.enter="addTask(newTask)"
+        placeholder="Quick add a new task"
+        class="bg-surface ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+      />
+      <button
+        @click="addTask(newTask)"
+        class="px-6 py-3 bg-surface hover:bg-overlay rounded-xl font-medium flex items-center gap-2 cursor-pointer transition duration-200"
+      >
+        <PlusIcon class="size-5" />
+      </button>
+    </div>
   </div>
 </template>
 
