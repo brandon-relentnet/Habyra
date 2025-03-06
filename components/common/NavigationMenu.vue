@@ -206,7 +206,7 @@ const pageInfo = computed(() => {
 <template>
   <div>
     <!-- Mobile menu button -->
-    <div class="md:hidden flex justify-between items-center bg-base p-4">
+    <div class="lg:hidden flex justify-between items-center bg-base p-4">
       <div class="flex items-center">
         <component :is="pageInfo.icon" class="mr-2 w-6 h-6 text-primary" />
         <span class="font-semibold text-text">{{ pageInfo.title }}</span>
@@ -220,7 +220,7 @@ const pageInfo = computed(() => {
     <!-- Mobile Navigation -->
     <div
       v-if="mobileMenuOpen"
-      class="md:hidden bg-surface border-muted border-b"
+      class="lg:hidden bg-surface border-muted border-b"
     >
       <div class="space-y-1 px-2 pt-2 pb-3">
         <template v-for="item in navItems" :key="item.name">
@@ -286,7 +286,7 @@ const pageInfo = computed(() => {
     </div>
 
     <!-- Desktop Navigation -->
-    <nav class="hidden md:block bg-base">
+    <nav class="hidden lg:block bg-base">
       <div class="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div class="flex justify-between items-center h-16">
           <!-- Main navigation -->
@@ -307,11 +307,11 @@ const pageInfo = computed(() => {
                       'flex items-center space-x-1 px-3 py-2 rounded-xl font-medium text-sm transition duration-200 cursor-pointer',
                       openDropdowns[item.name]
                         ? isActive(item.path)
-                          ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
+                          ? 'colored-bg text-base'
                           : 'bg-linear-to-br from-rose/20 via-iris/20 to-foam/20 text-text'
                         : isActive(item.path)
-                        ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
-                        : 'text-subtle hover:text-text hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20',
+                        ? 'colored-bg text-base'
+                        : 'text-subtle hover:text-text colored-bg-hover',
                     ]"
                   >
                     <component :is="item.icon" class="mr-1 size-4" />
@@ -361,8 +361,8 @@ const pageInfo = computed(() => {
                   class="px-3 py-2 rounded-xl font-semibold text-sm transition duration-200"
                   :class="
                     isActive(item.path)
-                      ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
-                      : 'text-subtle hover:text-text hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20'
+                      ? 'colored-bg text-base'
+                      : 'text-subtle hover:text-text colored-bg-hover'
                   "
                 >
                   <div class="flex items-center">
@@ -383,8 +383,8 @@ const pageInfo = computed(() => {
               class="ml-4 px-3 py-2 rounded-xl font-semibold text-sm transition duration-200"
               :class="
                 isActive(item.path)
-                  ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
-                  : 'text-subtle hover:text-text hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20'
+                  ? 'colored-bg text-base'
+                  : 'text-subtle hover:text-text colored-bg-hover'
               "
             >
               <div class="flex items-center">
@@ -404,7 +404,7 @@ const pageInfo = computed(() => {
           <div class="flex items-center">
             <component
               :is="pageInfo.icon"
-              class="flex-shrink-0 bg-linear-to-br from-rose via-iris to-foam p-2 rounded-xl size-12 text-surface"
+              class="flex-shrink-0 p-2 rounded-xl size-12 text-surface colored-bg"
             />
             <div class="ml-4">
               <h1 class="font-semibold text-text text-2xl">

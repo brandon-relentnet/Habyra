@@ -40,12 +40,12 @@
     @apply bg-clip-text bg-linear-to-r from-rose via-iris to-foam text-transparent;
 }
 
-.colored-background {
-    @apply bg-linear-to-br from-rose via-iris to-foam text-base;
+.colored-bg {
+    @apply bg-linear-to-br from-rose via-iris to-foam;
 }
 
 .colored-bg-hover {
-    @apply bg-linear-to-br from-rose/20 via-iris/20 to-foam/20 text-text;
+    @apply hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20;
 }
 
 html {
