@@ -17,7 +17,6 @@ import {
 definePageMeta({
   title: "Habit Statistics",
   description: "Track your progress and see how your habits are improving over time.",
-  layout: "habits",
 });
 
 const tasksStore = useTasksStore();
@@ -80,16 +79,16 @@ function getBarHeight(value: number) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text pb-16">
-    <h1 class="text-2xl font-bold mb-6">Habit Statistics</h1>
+  <div class="bg-base pb-16 min-h-screen text-text">
+    <h1 class="mb-6 font-bold text-2xl">Habit Statistics</h1>
 
     <!-- Stats Overview Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="gap-4 grid grid-cols-1 md:grid-cols-2 mb-8">
       <!-- Tasks Card -->
       <div class="bg-surface p-6 rounded-xl">
         <div class="flex justify-between items-start">
           <div>
-            <h2 class="font-semibold text-lg mb-4">Tasks Overview</h2>
+            <h2 class="mb-4 font-semibold text-lg">Tasks Overview</h2>
             <div class="space-y-2">
               <div class="flex items-center gap-2">
                 <CheckCircleIcon class="size-5 text-foam" />
@@ -122,7 +121,7 @@ function getBarHeight(value: number) {
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
               />
               <!-- Percentage text -->
-              <text x="18" y="20.5" class="text-[10px] font-medium" text-anchor="middle">{{ completionRate }}%</text>
+              <text x="18" y="20.5" class="font-medium text-[10px]" text-anchor="middle">{{ completionRate }}%</text>
             </svg>
           </div>
         </div>
@@ -132,7 +131,7 @@ function getBarHeight(value: number) {
       <div class="bg-surface p-6 rounded-xl">
         <div class="flex justify-between items-start">
           <div>
-            <h2 class="font-semibold text-lg mb-4">Goals Progress</h2>
+            <h2 class="mb-4 font-semibold text-lg">Goals Progress</h2>
             <div class="space-y-2">
               <div class="flex items-center gap-2">
                 <TrophyIcon class="size-5 text-gold" />
@@ -165,7 +164,7 @@ function getBarHeight(value: number) {
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
               />
               <!-- Percentage text -->
-              <text x="18" y="20.5" class="text-[10px] font-medium" text-anchor="middle">{{ goalCompletionRate }}%</text>
+              <text x="18" y="20.5" class="font-medium text-[10px]" text-anchor="middle">{{ goalCompletionRate }}%</text>
             </svg>
           </div>
         </div>
@@ -173,33 +172,33 @@ function getBarHeight(value: number) {
     </div>
     
     <!-- Streaks Card -->
-    <div class="bg-surface p-6 rounded-xl mb-8">
-      <h2 class="font-semibold text-lg mb-4">Habit Streaks</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-surface mb-8 p-6 rounded-xl">
+      <h2 class="mb-4 font-semibold text-lg">Habit Streaks</h2>
+      <div class="gap-6 grid grid-cols-1 md:grid-cols-2">
         <!-- Current Streak -->
-        <div class="flex items-center justify-between">
+        <div class="flex justify-between items-center">
           <div>
             <h3 class="text-subtle text-sm">Current Streak</h3>
             <div class="flex items-end gap-1 mt-1">
-              <span class="text-3xl font-bold">{{ currentStreak }}</span>
-              <span class="text-subtle mb-1">days</span>
+              <span class="font-bold text-3xl">{{ currentStreak }}</span>
+              <span class="mb-1 text-subtle">days</span>
             </div>
           </div>
-          <div class="size-14 bg-overlay rounded-full flex items-center justify-center">
+          <div class="flex justify-center items-center bg-overlay rounded-full size-14">
             <FireIcon class="size-8 text-rose" />
           </div>
         </div>
         
         <!-- Longest Streak -->
-        <div class="flex items-center justify-between">
+        <div class="flex justify-between items-center">
           <div>
             <h3 class="text-subtle text-sm">Longest Streak</h3>
             <div class="flex items-end gap-1 mt-1">
-              <span class="text-3xl font-bold">{{ longestStreak }}</span>
-              <span class="text-subtle mb-1">days</span>
+              <span class="font-bold text-3xl">{{ longestStreak }}</span>
+              <span class="mb-1 text-subtle">days</span>
             </div>
           </div>
-          <div class="size-14 bg-overlay rounded-full flex items-center justify-center">
+          <div class="flex justify-center items-center bg-overlay rounded-full size-14">
             <TrophyIcon class="size-8 text-gold" />
           </div>
         </div>
@@ -207,16 +206,16 @@ function getBarHeight(value: number) {
     </div>
     
     <!-- Weekly Progress & Productivity Insights -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
       <!-- Weekly Progress Chart -->
       <div class="bg-surface p-6 rounded-xl">
-        <h2 class="font-semibold text-lg mb-4">Weekly Activity</h2>
+        <h2 class="mb-4 font-semibold text-lg">Weekly Activity</h2>
         
         <!-- Bar chart -->
-        <div class="flex items-end justify-between h-36 mb-2">
+        <div class="flex justify-between items-end mb-2 h-36">
           <div v-for="day in weeklyProgress" :key="day.day" class="flex flex-col items-center w-full">
             <div 
-              class="w-4/5 bg-iris rounded-t-md transition-all duration-500 ease-in-out"
+              class="bg-iris rounded-t-md w-4/5 transition-all duration-500 ease-in-out"
               :style="`height: ${getBarHeight(day.completed)}%`"
             ></div>
           </div>
@@ -230,7 +229,7 @@ function getBarHeight(value: number) {
         </div>
         
         <!-- Week over week trend -->
-        <div class="mt-4 pt-4 border-t border-surface-600 flex items-center gap-2">
+        <div class="flex items-center gap-2 mt-4 pt-4 border-surface-600 border-t">
           <div 
             class="flex items-center gap-1"
             :class="weekOverWeekChange >= 0 ? 'text-foam' : 'text-rose'"
@@ -245,28 +244,28 @@ function getBarHeight(value: number) {
       
       <!-- Productivity Insights -->
       <div class="bg-surface p-6 rounded-xl">
-        <h2 class="font-semibold text-lg mb-4">Productivity Insights</h2>
+        <h2 class="mb-4 font-semibold text-lg">Productivity Insights</h2>
         
         <div class="space-y-4">
           <!-- Time of day stats -->
           <div>
-            <h3 class="text-subtle text-sm mb-2">When you're most productive</h3>
+            <h3 class="mb-2 text-subtle text-sm">When you're most productive</h3>
             <div class="flex items-end gap-2 h-20">
               <div v-for="time in timeOfDayStats" :key="time.time" class="flex flex-col items-center w-full">
                 <div 
-                  class="w-4/5 bg-foam rounded-t-md transition-all duration-500 ease-in-out"
+                  class="bg-foam rounded-t-md w-4/5 transition-all duration-500 ease-in-out"
                   :style="`height: ${getBarHeight(time.completed)}%`"
                 ></div>
-                <span class="text-subtle text-xs mt-1">{{ time.time }}</span>
+                <span class="mt-1 text-subtle text-xs">{{ time.time }}</span>
               </div>
             </div>
           </div>
           
           <!-- Most productive day -->
-          <div class="pt-4 border-t border-surface-600">
-            <h3 class="text-subtle text-sm mb-2">Most productive day</h3>
+          <div class="pt-4 border-surface-600 border-t">
+            <h3 class="mb-2 text-subtle text-sm">Most productive day</h3>
             <div class="flex items-center gap-2">
-              <div class="size-10 bg-overlay rounded-full flex items-center justify-center">
+              <div class="flex justify-center items-center bg-overlay rounded-full size-10">
                 <CalendarIcon class="size-6 text-iris" />
               </div>
               <span class="font-medium">{{ mostProductiveDay }}</span>
@@ -274,10 +273,10 @@ function getBarHeight(value: number) {
           </div>
           
           <!-- Task completion trend -->
-          <div class="pt-4 border-t border-surface-600">
-            <h3 class="text-subtle text-sm mb-2">Task completion trend</h3>
+          <div class="pt-4 border-surface-600 border-t">
+            <h3 class="mb-2 text-subtle text-sm">Task completion trend</h3>
             <div class="flex items-center gap-2">
-              <div class="size-10 bg-overlay rounded-full flex items-center justify-center">
+              <div class="flex justify-center items-center bg-overlay rounded-full size-10">
                 <ChartBarIcon class="size-6 text-gold" />
               </div>
               <span>You complete {{ weeklyProgress.reduce((sum, day) => sum + day.completed, 0) }} tasks per week on average</span>

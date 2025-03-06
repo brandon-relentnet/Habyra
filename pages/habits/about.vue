@@ -14,7 +14,6 @@ definePageMeta({
   title: "About Habit Building",
   description:
     "Learn how to build lasting habits using proven techniques from Atomic Habits.",
-  layout: "habits",
 });
 
 // Habit loops based on Atomic Habits
@@ -130,16 +129,16 @@ const resources = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text pb-16">
+  <div class="bg-base pb-16 min-h-screen text-text">
     <!-- Hero section -->
     <div class="mb-16 text-center">
-      <h1 class="text-3xl font-bold mb-4">Build Better Habits</h1>
-      <p class="text-subtle max-w-2xl mx-auto">
+      <h1 class="mb-4 font-bold text-3xl">Build Better Habits</h1>
+      <p class="mx-auto max-w-2xl text-subtle">
         Learn how to create lasting habits using scientific principles from
         <a
           href="https://jamesclear.com/atomic-habits"
           target="_blank"
-          class="inline-flex items-center gap-1 colored-text hover:underline"
+          class="inline-flex items-center gap-1 hover:underline colored-text"
           >Atomic Habits</a
         >
         by James Clear. Small changes, remarkable results.
@@ -148,7 +147,7 @@ const resources = [
 
     <!-- The Four Laws of Behavior Change -->
     <div class="mb-16">
-      <h2 class="text-2xl font-semibold mb-6 border-b border-surface pb-2">
+      <h2 class="mb-6 pb-2 border-surface border-b font-semibold text-2xl">
         The Four Laws of Behavior Change
       </h2>
       <p class="mb-8 text-subtle">
@@ -156,7 +155,7 @@ const resources = [
         ones. Based on the habit loop: cue, craving, response, and reward.
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="gap-6 grid grid-cols-1 md:grid-cols-2">
         <div
           v-for="loop in habitLoops"
           :key="loop.id"
@@ -166,24 +165,24 @@ const resources = [
             :class="`bg-gradient-to-r ${loop.color} p-4 flex items-center gap-3`"
           >
             <div
-              class="bg-surface rounded-full size-10 flex items-center justify-center"
+              class="flex justify-center items-center bg-surface rounded-full size-10"
             >
               <component :is="loop.icon" class="size-6 text-text" />
             </div>
-            <h3 class="text-xl font-semibold text-surface">{{ loop.title }}</h3>
+            <h3 class="font-semibold text-surface text-xl">{{ loop.title }}</h3>
           </div>
 
           <div class="p-6">
             <p class="mb-4">{{ loop.description }}</p>
 
-            <h4 class="font-medium mb-2">Examples:</h4>
+            <h4 class="mb-2 font-medium">Examples:</h4>
             <ul class="space-y-2">
               <li
                 v-for="(example, i) in loop.examples"
                 :key="i"
                 class="flex items-start gap-2"
               >
-                <ArrowSmallRightIcon class="size-4 mt-1 text-subtle" />
+                <ArrowSmallRightIcon class="mt-1 size-4 text-subtle" />
                 <span>{{ example }}</span>
               </li>
             </ul>
@@ -194,7 +193,7 @@ const resources = [
 
     <!-- Key Principles -->
     <div class="mb-16">
-      <h2 class="text-2xl font-semibold mb-6 border-b border-surface pb-2">
+      <h2 class="mb-6 pb-2 border-surface border-b font-semibold text-2xl">
         Key Principles
       </h2>
       <p class="mb-8 text-subtle">
@@ -206,16 +205,16 @@ const resources = [
         <div
           v-for="principle in corePrinciples"
           :key="principle.id"
-          class="bg-surface rounded-xl p-6 flex gap-4"
+          class="flex gap-4 bg-surface p-6 rounded-xl"
         >
           <div
-            class="bg-overlay rounded-full size-12 flex-shrink-0 flex items-center justify-center"
+            class="flex flex-shrink-0 justify-center items-center bg-overlay rounded-full size-12"
           >
             <component :is="principle.icon" class="size-6 text-foam" />
           </div>
 
           <div>
-            <h3 class="text-lg font-semibold mb-2">{{ principle.title }}</h3>
+            <h3 class="mb-2 font-semibold text-lg">{{ principle.title }}</h3>
             <p class="text-subtle">{{ principle.description }}</p>
           </div>
         </div>
@@ -224,49 +223,49 @@ const resources = [
 
     <!-- How to Use This App -->
     <div class="mb-16">
-      <h2 class="text-2xl font-semibold mb-6 border-b border-surface pb-2">
+      <h2 class="mb-6 pb-2 border-surface border-b font-semibold text-2xl">
         How to Use This App
       </h2>
 
       <div class="space-y-6">
-        <div class="bg-surface rounded-xl p-6">
-          <h3 class="text-lg font-semibold mb-3">
+        <div class="bg-surface p-6 rounded-xl">
+          <h3 class="mb-3 font-semibold text-lg">
             1. Create daily tasks that build habits
           </h3>
-          <p class="text-subtle mb-4">
+          <p class="mb-4 text-subtle">
             Use the Tasks section to create small, manageable daily tasks that
             support your habit building. Keep tasks small and specific—use the
             Two-Minute Rule to start.
           </p>
-          <div class="bg-overlay rounded-xl p-4 text-subtle italic">
+          <div class="bg-overlay p-4 rounded-xl text-subtle italic">
             <strong>Example:</strong> Instead of "Exercise more," create tasks
             like "Put on running shoes and step outside for 2 minutes" or "Do 5
             push-ups before breakfast."
           </div>
         </div>
 
-        <div class="bg-surface rounded-xl p-6">
-          <h3 class="text-lg font-semibold mb-3">2. Set meaningful goals</h3>
-          <p class="text-subtle mb-4">
+        <div class="bg-surface p-6 rounded-xl">
+          <h3 class="mb-3 font-semibold text-lg">2. Set meaningful goals</h3>
+          <p class="mb-4 text-subtle">
             Use the Goals section to define what you're working toward. Create a
             mix of short-term, long-term, and life goals that align with the
             identity you want to build.
           </p>
-          <div class="bg-overlay rounded-xl p-4 text-subtle italic">
+          <div class="bg-overlay p-4 rounded-xl text-subtle italic">
             <strong>Example:</strong> A short-term goal might be "Meditate for 5
             minutes daily for one week." A life goal could be "Become someone
             who prioritizes mental well-being."
           </div>
         </div>
 
-        <div class="bg-surface rounded-xl p-6">
-          <h3 class="text-lg font-semibold mb-3">3. Track your progress</h3>
-          <p class="text-subtle mb-4">
+        <div class="bg-surface p-6 rounded-xl">
+          <h3 class="mb-3 font-semibold text-lg">3. Track your progress</h3>
+          <p class="mb-4 text-subtle">
             Use the Statistics page to monitor your habit streaks and overall
             progress. Visualize your improvements over time and identify
             patterns in your behavior.
           </p>
-          <div class="bg-overlay rounded-xl p-4 text-subtle italic">
+          <div class="bg-overlay p-4 rounded-xl text-subtle italic">
             <strong>Tip:</strong> Don't break the chain! Try to maintain your
             streak, but if you miss a day, never miss twice in a row.
           </div>
@@ -276,26 +275,26 @@ const resources = [
 
     <!-- Recommended Resources -->
     <div>
-      <h2 class="text-2xl font-semibold mb-6 border-b border-surface pb-2">
+      <h2 class="mb-6 pb-2 border-surface border-b font-semibold text-2xl">
         Recommended Resources
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="gap-4 grid grid-cols-1 md:grid-cols-3">
         <div
           v-for="(resource, i) in resources"
           :key="i"
-          class="bg-surface rounded-xl p-6"
+          class="bg-surface p-6 rounded-xl"
         >
           <div class="flex items-center gap-3 mb-3">
             <BookOpenIcon class="size-6 text-iris" />
             <h3 class="font-semibold">{{ resource.title }}</h3>
           </div>
-          <p class="text-subtle mb-2">by {{ resource.author }}</p>
-          <p class="text-sm mb-4">{{ resource.description }}</p>
+          <p class="mb-2 text-subtle">by {{ resource.author }}</p>
+          <p class="mb-4 text-sm">{{ resource.description }}</p>
           <a
             :href="resource.link"
             target="_blank"
-            class="inline-flex items-center gap-1 colored-text hover:underline"
+            class="inline-flex items-center gap-1 hover:underline colored-text"
           >
             Learn more
             <ArrowSmallRightIcon class="size-4 text-subtle" />

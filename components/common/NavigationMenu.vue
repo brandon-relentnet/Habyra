@@ -45,29 +45,33 @@ const navItems = [
   {
     name: "Habits",
     path: "/habits",
-    title: "Habit Tracker",
+    title: "Habits",
     description:
       "Track and build positive habits with powerful habit-forming techniques.",
     icon: CheckCircleIcon,
     children: [
       {
+        name: "About",
         path: "/habits/about",
-        title: "About Habit Tracking",
+        title: "Habits // About",
         description: "Learn the science behind building lasting habits.",
       },
       {
+        name: "Goals",
         path: "/habits/goals",
-        title: "Habit Goals",
+        title: "Habits // Goals",
         description: "Set and track habit-related goals effectively.",
       },
       {
+        name: "Statistics",
         path: "/habits/statistics",
-        title: "Habit Statistics",
+        title: "Habits // Statistics",
         description: "Analyze your habit-building progress over time.",
       },
       {
+        name: "Tasks",
         path: "/habits/tasks",
-        title: "Habit Tasks",
+        title: "Habits // Tasks",
         description: "Manage daily tasks related to your habits.",
       },
     ],
@@ -153,23 +157,35 @@ const activeNavItem = computed(() => {
 // Add a function to check if a nav item should be considered active
 const isActive = (item) => {
   if (item.path === route.path) return true;
-  
+
   // Check if route is a child route of this item
-  if (item.children && route.path.startsWith(item.path + '/')) return true;
-  
+  if (item.children && route.path.startsWith(item.path + "/")) return true;
+
   return false;
 };
+
+const habitsPaths = [
+  { name: "Home", path: "/habits" },
+  ...navItems
+    .find(item => item.name === "Habits")
+    ?.children.map(child => ({ 
+      name: child.name, 
+      path: child.path 
+    })) || []
+];
+
+console.log(habitsPaths);
 </script>
 
 <template>
   <div>
-    <div class="relative h-20 w-full">
-      <nav class="fixed top-0 left-0 w-full bg-base h-20 z-50">
-        <ul class="flex text-text gap-x-4 items-center justify-center h-full">
+    <div class="relative bg-surface w-full h-20">
+      <nav class="top-0 left-0 z-50 fixed bg-base w-full h-20">
+        <ul class="flex justify-center items-center gap-x-4 h-full text-text">
           <li v-for="item in visibleNavItems" :key="item.name">
             <RouterLink
               :to="item.path"
-              class="text-text px-4 py-2 font-semibold"
+              class="px-4 py-2 font-semibold text-text"
               :class="{ 'colored-text': isActive(item) }"
             >
               {{ item.name }}
@@ -179,21 +195,32 @@ const isActive = (item) => {
       </nav>
     </div>
 
-    <header v-if="activeNavItem" class="bg-surface z-25 relative h-30">
-      <div class="container mx-auto flex items-center h-full">
+    <header class="z-25 relative flex justify-between bg-surface p-6 px-8">
+      <div class="flex items-center h-full">
         <component
           :is="activeNavItem.icon"
-          class="size-12 bg-linear-to-br from-rose via-iris to-foam text-surface rounded-xl p-2 mr-4"
+          class="flex-shrink-0 bg-linear-to-br from-rose via-iris to-foam mr-4 p-2 rounded-xl size-12 text-surface"
         />
         <div>
-          <h1 class="text-2xl font-semibold text-text">
+          <h1 class="font-semibold text-text text-2xl">
             {{ activeNavItem.title }}
           </h1>
-          <p class="text-subtle italic font-serif">
+          <p class="font-serif text-subtle italic">
             {{ activeNavItem.description }}
           </p>
         </div>
       </div>
+      <ul v-if="activeNavItem.path === '/habits'" class="flex justify-start items-center gap-y-4">
+        <li v-for="link in habitsPaths" :key="link.name">
+          <RouterLink
+            :to="link.path"
+            class="p-4 font-semibold text-text"
+            activeClass="colored-text"
+          >
+            {{ link.name }}
+          </RouterLink>
+        </li>
+      </ul>
     </header>
   </div>
 </template>

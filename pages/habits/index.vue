@@ -15,7 +15,6 @@ import {
 definePageMeta({
   title: "Habit Builder",
   description: "Build better habits one small step at a time.",
-  layout: "habits",
 });
 
 const tasksStore = useTasksStore();
@@ -107,10 +106,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text pb-16">
+  <div class="bg-base pb-16 min-h-screen text-text">
     <!-- Hero section -->
     <div class="mb-10">
-      <h1 class="text-3xl font-bold mb-2">{{ welcomeMessage }}</h1>
+      <h1 class="mb-2 font-bold text-3xl">{{ welcomeMessage }}</h1>
       <p class="text-subtle">
         Your habit-building journey is all about small, consistent improvements.
         <span v-if="currentStreak > 0" class="text-foam">
@@ -120,11 +119,11 @@ onMounted(() => {
     </div>
 
     <!-- Feature cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+    <div class="gap-6 grid grid-cols-1 sm:grid-cols-2 mb-12">
       <div
         v-for="feature in features"
         :key="feature.title"
-        class="bg-surface rounded-xl overflow-hidden relative group p-6"
+        class="group relative bg-surface p-6 rounded-xl overflow-hidden"
       >
         <!-- Card content -->
         <RouterLink :to="feature.link">
@@ -134,14 +133,14 @@ onMounted(() => {
             >
               <component :is="feature.icon" class="size-6 text-surface" />
             </div>
-            <h2 class="text-xl font-semibold">{{ feature.title }}</h2>
+            <h2 class="font-semibold text-xl">{{ feature.title }}</h2>
           </div>
 
-          <p class="text-subtle mb-6">{{ feature.description }}</p>
+          <p class="mb-6 text-subtle">{{ feature.description }}</p>
 
           <div class="flex justify-between items-center">
-            <span class="text-sm text-subtle">{{ feature.stats }}</span>
-            <span class="colored-text hover:underline flex items-center gap-1">
+            <span class="text-subtle text-sm">{{ feature.stats }}</span>
+            <span class="flex items-center gap-1 hover:underline colored-text">
               Go to {{ feature.title }}
               <ArrowLongRightIcon class="size-5 text-subtle" />
             </span>
@@ -157,16 +156,16 @@ onMounted(() => {
     </div>
 
     <!-- Quick start section -->
-    <div class="bg-surface rounded-xl p-6 mb-12">
-      <h2 class="text-xl font-semibold mb-4">Quick Start Guide</h2>
-      <p class="text-subtle mb-6">
+    <div class="bg-surface mb-12 p-6 rounded-xl">
+      <h2 class="mb-4 font-semibold text-xl">Quick Start Guide</h2>
+      <p class="mb-6 text-subtle">
         Ready to build better habits? Here's a simple path to get started:
       </p>
 
       <ol class="space-y-4">
         <li class="flex items-start gap-3">
           <div
-            class="size-8 rounded-full bg-foam/10 flex items-center justify-center text-foam font-semibold flex-shrink-0"
+            class="flex flex-shrink-0 justify-center items-center bg-foam/10 rounded-full size-8 font-semibold text-foam"
           >
             1
           </div>
@@ -176,7 +175,7 @@ onMounted(() => {
               Start with 2-minute tasks that are easy to complete. Use the
               <RouterLink
                 to="/habits/tasks"
-                class="colored-text hover:underline"
+                class="hover:underline colored-text"
                 >Tasks</RouterLink
               >
               page to track daily actions.
@@ -186,7 +185,7 @@ onMounted(() => {
 
         <li class="flex items-start gap-3">
           <div
-            class="size-8 rounded-full bg-iris/10 flex items-center justify-center text-iris font-semibold flex-shrink-0"
+            class="flex flex-shrink-0 justify-center items-center bg-iris/10 rounded-full size-8 font-semibold text-iris"
           >
             2
           </div>
@@ -196,7 +195,7 @@ onMounted(() => {
               Set clear intentions on the
               <RouterLink
                 to="/habits/goals"
-                class="colored-text hover:underline"
+                class="hover:underline colored-text"
                 >Goals</RouterLink
               >
               page to give direction to your habit-building efforts.
@@ -206,7 +205,7 @@ onMounted(() => {
 
         <li class="flex items-start gap-3">
           <div
-            class="size-8 rounded-full bg-gold/10 flex items-center justify-center text-gold font-semibold flex-shrink-0"
+            class="flex flex-shrink-0 justify-center items-center bg-gold/10 rounded-full size-8 font-semibold text-gold"
           >
             3
           </div>
@@ -216,7 +215,7 @@ onMounted(() => {
               Visit the
               <RouterLink
                 to="/habits/statistics"
-                class="colored-text hover:underline"
+                class="hover:underline colored-text"
                 >Statistics</RouterLink
               >
               page to see your habit streaks and monitor your improvement.
@@ -226,7 +225,7 @@ onMounted(() => {
 
         <li class="flex items-start gap-3">
           <div
-            class="size-8 rounded-full bg-rose/10 flex items-center justify-center text-rose font-semibold flex-shrink-0"
+            class="flex flex-shrink-0 justify-center items-center bg-rose/10 rounded-full size-8 font-semibold text-rose"
           >
             4
           </div>
@@ -236,7 +235,7 @@ onMounted(() => {
               Explore the
               <RouterLink
                 to="/habits/about"
-                class="colored-text hover:underline"
+                class="hover:underline colored-text"
                 >About</RouterLink
               >
               page to understand the science of habit formation.
@@ -247,13 +246,13 @@ onMounted(() => {
     </div>
 
     <!-- Tip of the day -->
-    <div class="bg-surface rounded-xl p-6">
+    <div class="bg-surface p-6 rounded-xl">
       <div class="flex items-center gap-3 mb-4">
         <CheckCircleIcon class="size-6 text-foam" />
-        <h2 class="text-xl font-semibold">Habit Building Tip</h2>
+        <h2 class="font-semibold text-xl">Habit Building Tip</h2>
       </div>
 
-      <p class="text-subtle italic border-l-4 border-foam/30 pl-4 py-1">
+      <p class="py-1 pl-4 border-foam/30 border-l-4 text-subtle italic">
         {{ tipOfTheDay }}
       </p>
     </div>

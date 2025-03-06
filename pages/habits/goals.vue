@@ -13,7 +13,6 @@ definePageMeta({
   title: "Goal Tracker",
   description:
     "Set and track your short and long-term goals for better habit building.",
-  layout: "habits",
 });
 
 const goalsStore = useGoalsStore();
@@ -99,13 +98,13 @@ function formatDate(dateString?: string) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text pb-16">
+  <div class="bg-base pb-16 min-h-screen text-text">
     <div v-auto-animate>
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Goal Tracker</h1>
+        <h1 class="font-bold text-2xl">Goal Tracker</h1>
         <button
           @click="showAddGoalForm = !showAddGoalForm"
-          class="size-12 bg-linear-to-br from-rose via-iris to-foam text-surface rounded-xl p-2 flex items-center justify-center cursor-pointer transition duration-200 active:scale-90 hover:scale-105"
+          class="flex justify-center items-center bg-linear-to-br from-rose via-iris to-foam p-2 rounded-xl size-12 text-surface hover:scale-105 active:scale-90 transition duration-200 cursor-pointer"
         >
           <PlusIcon
             class="size-6 transition duration-500"
@@ -116,38 +115,38 @@ function formatDate(dateString?: string) {
 
       <!-- Add/Edit Goal Form -->
       <div v-if="showAddGoalForm" class="bg-surface p-6 rounded-xl">
-        <h2 class="text-xl font-semibold mb-4">
+        <h2 class="mb-4 font-semibold text-xl">
           {{ editingGoalId !== null ? "Edit Goal" : "Add New Goal" }}
         </h2>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Goal Title</label>
+            <label class="block mb-1 font-medium text-sm">Goal Title</label>
             <input
               v-model="newGoalTitle"
               type="text"
               placeholder="What do you want to achieve?"
-              class="bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+              class="bg-overlay p-2 border-3 focus:border-foam/60 border-transparent rounded-xl outline-none ring ring-foam/10 w-full placeholder:italic transition duration-200 placeholder-subtle"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Description</label>
+            <label class="block mb-1 font-medium text-sm">Description</label>
             <textarea
               v-model="newGoalDescription"
               placeholder="Describe your goal in detail..."
-              class="bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl placeholder-subtle placeholder:italic w-full"
+              class="bg-overlay p-2 border-3 focus:border-foam/60 border-transparent rounded-xl outline-none ring ring-foam/10 w-full placeholder:italic transition duration-200 placeholder-subtle"
               rows="3"
             ></textarea>
           </div>
 
           <div class="flex gap-6">
             <div class="flex-1">
-              <label class="block text-sm font-medium mb-1"
+              <label class="block mb-1 font-medium text-sm"
                 >Goal Category</label
               >
               <select
                 v-model="newGoalCategory"
-                class="bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl w-full"
+                class="bg-overlay p-2 border-3 focus:border-foam/60 border-transparent rounded-xl outline-none ring ring-foam/10 w-full transition duration-200"
               >
                 <option value="short">Short-Term (1-30 days)</option>
                 <option value="long">Long-Term (1-12 months)</option>
@@ -156,13 +155,13 @@ function formatDate(dateString?: string) {
             </div>
 
             <div class="flex-1">
-              <label class="block text-sm font-medium mb-1"
+              <label class="block mb-1 font-medium text-sm"
                 >Target Date (Optional)</label
               >
               <input
                 v-model="newGoalDate"
                 type="date"
-                class="bg-overlay ring p-2 ring-foam/10 border-3 border-transparent focus:border-foam/60 transition duration-200 outline-none rounded-xl w-full"
+                class="bg-overlay p-2 border-3 focus:border-foam/60 border-transparent rounded-xl outline-none ring ring-foam/10 w-full transition duration-200"
               />
             </div>
           </div>
@@ -173,13 +172,13 @@ function formatDate(dateString?: string) {
                 showAddGoalForm = false;
                 editingGoalId = null;
               "
-              class="px-4 py-2 rounded-xl bg-overlay hover:bg-overlay/80 text-text cursor-pointer"
+              class="bg-overlay hover:bg-overlay/80 px-4 py-2 rounded-xl text-text cursor-pointer"
             >
               Cancel
             </button>
             <button
               @click="addGoal"
-              class="px-4 py-2 rounded-xl bg-foam text-base cursor-pointer"
+              class="bg-foam px-4 py-2 rounded-xl text-base cursor-pointer"
             >
               {{ editingGoalId !== null ? "Update Goal" : "Add Goal" }}
             </button>
@@ -192,10 +191,10 @@ function formatDate(dateString?: string) {
     <div ref="goalsList" class="space-y-10 mt-8">
       <!-- Short-Term Goals -->
       <div>
-        <h2 class="text-xl font-semibold mb-3 border-b border-surface pb-2">
+        <h2 class="mb-3 pb-2 border-surface border-b font-semibold text-xl">
           Short-Term Goals
         </h2>
-        <p class="text-subtle italic mb-4" v-if="shortTermGoals.length === 0">
+        <p class="mb-4 text-subtle italic" v-if="shortTermGoals.length === 0">
           No short-term goals yet. Add one to get started!
         </p>
 
@@ -203,13 +202,13 @@ function formatDate(dateString?: string) {
           <div
             v-for="goal in shortTermGoals"
             :key="goal.id"
-            class="flex items-start justify-between p-4 border-b border-surface bg-surface rounded-xl transition duration-200 hover:bg-overlay"
+            class="flex justify-between items-start bg-surface hover:bg-overlay p-4 border-surface border-b rounded-xl transition duration-200"
             :class="{ 'opacity-60': goal.completed }"
           >
             <div class="flex items-start gap-3">
               <button @click="toggleComplete(goal.id)" class="mt-1">
                 <CheckCircleIcon
-                  class="size-6 cursor-pointer transition duration-200"
+                  class="size-6 transition duration-200 cursor-pointer"
                   :class="goal.completed ? 'text-foam' : 'text-subtle'"
                 />
               </button>
@@ -221,12 +220,12 @@ function formatDate(dateString?: string) {
                   {{ goal.title }}
                 </h3>
                 <p
-                  class="text-subtle text-sm mt-1"
+                  class="mt-1 text-subtle text-sm"
                   :class="{ 'line-through': goal.completed }"
                 >
                   {{ goal.description }}
                 </p>
-                <div class="text-xs text-subtle mt-2">
+                <div class="mt-2 text-subtle text-xs">
                   Target: {{ formatDate(goal.targetDate) }}
                 </div>
               </div>
@@ -251,10 +250,10 @@ function formatDate(dateString?: string) {
 
       <!-- Long-Term Goals -->
       <div>
-        <h2 class="text-xl font-semibold mb-3 border-b border-surface pb-2">
+        <h2 class="mb-3 pb-2 border-surface border-b font-semibold text-xl">
           Long-Term Goals
         </h2>
-        <p class="text-subtle italic mb-4" v-if="longTermGoals.length === 0">
+        <p class="mb-4 text-subtle italic" v-if="longTermGoals.length === 0">
           No long-term goals yet. Think about what you want to achieve this
           year!
         </p>
@@ -263,13 +262,13 @@ function formatDate(dateString?: string) {
           <div
             v-for="goal in longTermGoals"
             :key="goal.id"
-            class="flex items-start justify-between p-4 border-b border-surface bg-surface rounded-xl transition duration-200 hover:bg-overlay"
+            class="flex justify-between items-start bg-surface hover:bg-overlay p-4 border-surface border-b rounded-xl transition duration-200"
             :class="{ 'opacity-60': goal.completed }"
           >
             <div class="flex items-start gap-3">
               <button @click="toggleComplete(goal.id)" class="mt-1">
                 <CheckCircleIcon
-                  class="size-6 cursor-pointer transition duration-200"
+                  class="size-6 transition duration-200 cursor-pointer"
                   :class="goal.completed ? 'text-foam' : 'text-subtle'"
                 />
               </button>
@@ -281,12 +280,12 @@ function formatDate(dateString?: string) {
                   {{ goal.title }}
                 </h3>
                 <p
-                  class="text-subtle text-sm mt-1"
+                  class="mt-1 text-subtle text-sm"
                   :class="{ 'line-through': goal.completed }"
                 >
                   {{ goal.description }}
                 </p>
-                <div class="text-xs text-subtle mt-2">
+                <div class="mt-2 text-subtle text-xs">
                   Target: {{ formatDate(goal.targetDate) }}
                 </div>
               </div>
@@ -311,10 +310,10 @@ function formatDate(dateString?: string) {
 
       <!-- Life Goals -->
       <div>
-        <h2 class="text-xl font-semibold mb-3 border-b border-surface pb-2">
+        <h2 class="mb-3 pb-2 border-surface border-b font-semibold text-xl">
           Life Goals
         </h2>
-        <p class="text-subtle italic mb-4" v-if="lifeGoals.length === 0">
+        <p class="mb-4 text-subtle italic" v-if="lifeGoals.length === 0">
           No life goals yet. What legacy do you want to build?
         </p>
 
@@ -322,13 +321,13 @@ function formatDate(dateString?: string) {
           <div
             v-for="goal in lifeGoals"
             :key="goal.id"
-            class="flex items-start justify-between p-4 border-b border-surface bg-surface rounded-xl transition duration-200 hover:bg-overlay"
+            class="flex justify-between items-start bg-surface hover:bg-overlay p-4 border-surface border-b rounded-xl transition duration-200"
             :class="{ 'opacity-60': goal.completed }"
           >
             <div class="flex items-start gap-3">
               <button @click="toggleComplete(goal.id)" class="mt-1">
                 <CheckCircleIcon
-                  class="size-6 cursor-pointer transition duration-200"
+                  class="size-6 transition duration-200 cursor-pointer"
                   :class="goal.completed ? 'text-foam' : 'text-subtle'"
                 />
               </button>
@@ -340,12 +339,12 @@ function formatDate(dateString?: string) {
                   {{ goal.title }}
                 </h3>
                 <p
-                  class="text-subtle text-sm mt-1"
+                  class="mt-1 text-subtle text-sm"
                   :class="{ 'line-through': goal.completed }"
                 >
                   {{ goal.description }}
                 </p>
-                <div class="text-xs text-subtle mt-2">
+                <div class="mt-2 text-subtle text-xs">
                   Target: {{ formatDate(goal.targetDate) }}
                 </div>
               </div>
