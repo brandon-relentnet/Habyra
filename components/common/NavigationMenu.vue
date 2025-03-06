@@ -6,55 +6,68 @@ import {
   CheckCircleIcon,
   HeartIcon,
   FireIcon,
-  ServerStackIcon,
   ArrowRightEndOnRectangleIcon,
   UserIcon,
   ClipboardDocumentCheckIcon,
+  Bars3Icon,
+  XMarkIcon,
+  ChevronDownIcon,
 } from "@heroicons/vue/24/solid";
 import { useRoute } from "vue-router";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 const { loggedIn } = useUserSession();
 const route = useRoute();
+const mobileMenuOpen = ref(false);
+// Universal state for tracking open dropdowns keyed by nav item name
+const openDropdowns = ref({});
 
 const navItems = [
   {
     name: "Home",
     path: "/",
+    icon: HomeIcon,
     title: "Habyra",
     description:
       "Your all-in-one tool for building habits, boosting productivity, and prioritizing wellness — effortlessly.",
-    icon: HomeIcon,
   },
   {
     name: "Pomodoro",
     path: "/pomodoro",
+    icon: ClockIcon,
     title: "Pomodoro Timer",
     description:
       "Boost productivity with focused work sessions and regular breaks.",
-    icon: ClockIcon,
   },
   {
     name: "Recipes",
     path: "/recipes",
+    icon: BookOpenIcon,
     title: "Recipe Book",
     description:
       "Discover, save, and organize your favorite recipes for a healthier lifestyle.",
-    icon: BookOpenIcon,
   },
   {
     name: "Habits",
     path: "/habits",
-    title: "Habits",
+    icon: CheckCircleIcon,
+    title: "Habits // Dashboard",
     description:
       "Track and build positive habits with powerful habit-forming techniques.",
-    icon: CheckCircleIcon,
+    hasChildren: true,
     children: [
       {
-        name: "About",
-        path: "/habits/about",
-        title: "Habits // About",
-        description: "Learn the science behind building lasting habits.",
+        name: "Dashboard",
+        path: "/habits",
+        title: "Habits // Dashboard",
+        description:
+          "Track and build positive habits with powerful habit-forming techniques.",
+      },
+      {
+        name: "Tasks",
+        path: "/habits/tasks",
+        title: "Habits // Tasks",
+        description: "Manage daily tasks related to your habits.",
       },
       {
         name: "Goals",
@@ -69,158 +82,373 @@ const navItems = [
         description: "Analyze your habit-building progress over time.",
       },
       {
-        name: "Tasks",
-        path: "/habits/tasks",
-        title: "Habits // Tasks",
-        description: "Manage daily tasks related to your habits.",
+        name: "About",
+        path: "/habits/about",
+        title: "Habits // About",
+        description: "Learn the science behind building lasting habits.",
       },
     ],
   },
   {
     name: "Fitness",
     path: "/fitness",
+    icon: FireIcon,
     title: "Fitness Tracker",
     description:
       "Monitor your workouts, set fitness goals, and stay on top of your progress.",
-    icon: FireIcon,
   },
   {
     name: "Wellness",
     path: "/wellness",
+    icon: HeartIcon,
     title: "Wellness Hub",
     description:
       "Stay mindful of your mental health, meditation, and overall well-being.",
-    icon: HeartIcon,
   },
-  {
-    name: "Dashboard",
-    path: "/dashboard",
-    title: "Your Dashboard",
-    description:
-      "Customize your Habyra experience and access all your tools in one place.",
-    icon: ServerStackIcon,
-  },
-  {
-    name: "Registration",
-    path: "/registration",
-    title: "Create an Account",
-    description:
-      "Sign up for Habyra and start your journey towards better habits and productivity.",
-    icon: ClipboardDocumentCheckIcon,
-  },
+];
+
+const authItemsData = [
   {
     name: "Login",
     path: "/login",
+    icon: ArrowRightEndOnRectangleIcon,
     title: "Log in to Habyra",
     description: "Access your account and continue where you left off.",
-    icon: ArrowRightEndOnRectangleIcon,
+    showWhen: () => !loggedIn.value,
+  },
+  {
+    name: "Register",
+    path: "/registration",
+    icon: ClipboardDocumentCheckIcon,
+    title: "Create an Account",
+    description:
+      "Sign up for Habyra and start your journey towards better habits and productivity.",
+    showWhen: () => !loggedIn.value,
   },
   {
     name: "Account",
     path: "/account",
+    icon: UserIcon,
     title: "Your Account",
     description: "Manage your account settings, preferences, and security.",
-    icon: UserIcon,
+    showWhen: () => loggedIn.value,
   },
 ];
 
-const visibleNavItems = computed(() => {
-  return navItems.filter((item) => {
-    if (item.name === "Registration") return false;
-    if (item.name === "Login") return !loggedIn.value;
-    if (item.name === "Account") return loggedIn.value;
+const authItems = computed(() =>
+  authItemsData.filter((item) => item.showWhen())
+);
+const allItems = computed(() => [
+  ...navItems,
+  ...authItemsData.filter((item) => item.showWhen()),
+]);
 
-    return true;
-  });
-});
-
-const activeNavItem = computed(() => {
-  // Check if current route matches any nav item directly
-  let foundItem = navItems.find((item) => item.path === route.path);
-  if (foundItem) return foundItem;
-
-  // If in a subpage of Habits, return the parent Habits tab but update title & description
-  let habitsSection = navItems.find((item) => item.name === "Habits");
-  let subpage = habitsSection?.children?.find((child) =>
-    route.path.startsWith(child.path)
-  );
-
-  return subpage
-    ? {
-        ...habitsSection,
-        title: subpage.title,
-        description: subpage.description,
-      }
-    : habitsSection;
-});
-
-// Add a function to check if a nav item should be considered active
-const isActive = (item) => {
-  if (item.path === route.path) return true;
-
-  // Check if route is a child route of this item
-  if (item.children && route.path.startsWith(item.path + "/")) return true;
-
+// Checks if a given path (or its children) is active
+const isActive = (path, exact = false) => {
+  if (exact) return route.path === path;
+  if (route.path === path) return true;
+  if (path !== "/" && route.path.startsWith(path + "/")) return true;
   return false;
 };
 
-const habitsPaths = [
-  { name: "Home", path: "/habits" },
-  ...navItems
-    .find(item => item.name === "Habits")
-    ?.children.map(child => ({ 
-      name: child.name, 
-      path: child.path 
-    })) || []
-];
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
 
-console.log(habitsPaths);
+// Generic dropdown toggler for any nav item
+const toggleDropdown = (name) => {
+  openDropdowns.value[name] = !openDropdowns.value[name];
+};
+const closeDropdown = (name) => {
+  openDropdowns.value[name] = false;
+};
+
+// Compute which dropdown (if any) is active for header sub-navigation
+const activeDropdown = computed(() => {
+  return navItems.find(
+    (item) =>
+      item.hasChildren &&
+      item.children.some((child) => isActive(child.path, true))
+  );
+});
+
+// Determine page info based on current route
+const pageInfo = computed(() => {
+  for (const item of allItems.value) {
+    if (item.path === route.path) {
+      return {
+        title: item.title || item.name,
+        description: item.description || "",
+        icon: item.icon,
+      };
+    }
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.path === route.path) {
+          return {
+            title: child.title || `${item.name} / ${child.name}`,
+            description: child.description || "",
+            icon: item.icon,
+          };
+        }
+      }
+    }
+  }
+  return {
+    title: "Habyra",
+    description:
+      "Your all-in-one tool for building habits, boosting productivity, and prioritizing wellness.",
+    icon: HomeIcon,
+  };
+});
 </script>
 
 <template>
   <div>
-    <div class="relative bg-surface w-full h-20">
-      <nav class="top-0 left-0 z-50 fixed bg-base w-full h-20">
-        <ul class="flex justify-center items-center gap-x-4 h-full text-text">
-          <li v-for="item in visibleNavItems" :key="item.name">
-            <RouterLink
-              :to="item.path"
-              class="px-4 py-2 font-semibold text-text"
-              :class="{ 'colored-text': isActive(item) }"
-            >
-              {{ item.name }}
-            </RouterLink>
-          </li>
-        </ul>
-      </nav>
+    <!-- Mobile menu button -->
+    <div class="md:hidden flex justify-between items-center bg-base p-4">
+      <div class="flex items-center">
+        <component :is="pageInfo.icon" class="mr-2 w-6 h-6 text-primary" />
+        <span class="font-semibold text-text">{{ pageInfo.title }}</span>
+      </div>
+      <button @click="toggleMobileMenu" class="focus:outline-none text-text">
+        <Bars3Icon v-if="!mobileMenuOpen" class="w-6 h-6" />
+        <XMarkIcon v-else class="w-6 h-6" />
+      </button>
     </div>
 
-    <header class="z-25 relative flex justify-between bg-surface p-6 px-8">
-      <div class="flex items-center h-full">
-        <component
-          :is="activeNavItem.icon"
-          class="flex-shrink-0 bg-linear-to-br from-rose via-iris to-foam mr-4 p-2 rounded-xl size-12 text-surface"
-        />
-        <div>
-          <h1 class="font-semibold text-text text-2xl">
-            {{ activeNavItem.title }}
-          </h1>
-          <p class="font-serif text-subtle italic">
-            {{ activeNavItem.description }}
-          </p>
+    <!-- Mobile Navigation -->
+    <div
+      v-if="mobileMenuOpen"
+      class="md:hidden bg-surface border-muted border-b"
+    >
+      <div class="space-y-1 px-2 pt-2 pb-3">
+        <template v-for="item in navItems" :key="item.name">
+          <div>
+            <!-- If the nav item has children, render a dropdown -->
+            <div v-if="item.hasChildren" class="relative">
+              <button
+                @click="toggleDropdown(item.name)"
+                class="flex justify-between items-center hover:bg-muted px-3 py-2 rounded-md w-full text-text"
+                :class="{ 'bg-primary text-white': isActive(item.path) }"
+              >
+                <div class="flex items-center">
+                  <component :is="item.icon" class="mr-2 w-5 h-5" />
+                  <span>{{ item.name }}</span>
+                </div>
+                <ChevronDownIcon
+                  class="w-4 h-4"
+                  :class="{ 'transform rotate-180': openDropdowns[item.name] }"
+                />
+              </button>
+              <div
+                v-if="openDropdowns[item.name]"
+                class="space-y-1 mt-1 py-1 pl-8"
+              >
+                <RouterLink
+                  v-for="child in item.children"
+                  :key="child.name"
+                  :to="child.path"
+                  class="block hover:bg-muted px-3 py-2 rounded-md text-text"
+                  :class="{ 'bg-primary text-white': isActive(child.path) }"
+                >
+                  {{ child.name }}
+                </RouterLink>
+              </div>
+            </div>
+            <!-- Otherwise render a normal link -->
+            <RouterLink
+              v-else
+              :to="item.path"
+              class="flex items-center hover:bg-muted px-3 py-2 rounded-md text-text"
+              :class="{ 'bg-primary text-white': isActive(item.path) }"
+            >
+              <component :is="item.icon" class="mr-2 w-5 h-5" />
+              <span>{{ item.name }}</span>
+            </RouterLink>
+          </div>
+        </template>
+
+        <!-- Auth items -->
+        <div class="mt-2 pt-2 border-muted border-t">
+          <RouterLink
+            v-for="item in authItems"
+            :key="item.name"
+            :to="item.path"
+            class="flex items-center hover:bg-muted px-3 py-2 rounded-md text-text"
+            :class="{ 'bg-primary text-white': isActive(item.path) }"
+          >
+            <component :is="item.icon" class="mr-2 w-5 h-5" />
+            <span>{{ item.name }}</span>
+          </RouterLink>
         </div>
       </div>
-      <ul v-if="activeNavItem.path === '/habits'" class="flex justify-start items-center gap-y-4">
-        <li v-for="link in habitsPaths" :key="link.name">
-          <RouterLink
-            :to="link.path"
-            class="p-4 font-semibold text-text"
-            activeClass="colored-text"
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:block bg-base">
+      <div class="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div class="flex justify-between items-center h-16">
+          <!-- Main navigation -->
+          <div class="flex items-center">
+            <div class="flex flex-shrink-0 items-center">
+              <span class="ml-2 font-bold text-lg colored-text">Habyra</span>
+            </div>
+            <div class="flex items-center space-x-4 ml-10">
+              <template v-for="item in navItems" :key="item.name">
+                <div
+                  v-if="item.hasChildren"
+                  v-on-click-outside.bubble="() => closeDropdown(item.name)"
+                  class="relative"
+                >
+                  <button
+                    @click="toggleDropdown(item.name)"
+                    :class="[
+                      'flex items-center space-x-1 px-3 py-2 rounded-xl font-medium text-sm transition duration-200 cursor-pointer',
+                      openDropdowns[item.name]
+                        ? isActive(item.path)
+                          ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
+                          : 'bg-linear-to-br from-rose/20 via-iris/20 to-foam/20 text-text'
+                        : isActive(item.path)
+                        ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
+                        : 'text-subtle hover:text-text hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20',
+                    ]"
+                  >
+                    <component :is="item.icon" class="mr-1 size-4" />
+                    <span>{{ item.name }}</span>
+                    <ChevronDownIcon
+                      class="size-4 transition-transform duration-250"
+                      :class="{
+                        'transform rotate-180': openDropdowns[item.name],
+                      }"
+                    />
+                  </button>
+                  <div
+                    class="left-0 z-10 absolute bg-linear-to-tl from-rose via-iris to-foam shadow-lg mt-2 p-0.5 rounded-xl w-48 overflow-hidden"
+                    :class="[
+                      'dropdown',
+                      openDropdowns[item.name] ? 'active' : '',
+                    ]"
+                  >
+                    <div class="bg-surface rounded-xl size-full">
+                      <div
+                        class="divide-y divide-overlay"
+                        role="menu"
+                        aria-orientation="vertical"
+                      >
+                        <RouterLink
+                          v-for="child in item.children"
+                          :key="child.name"
+                          :to="child.path"
+                          class="block px-4 py-2 font-semibold text-subtle hover:text-text text-sm"
+                          role="menuitem"
+                        >
+                          <span
+                            :class="
+                              isActive(child.path, true) ? 'colored-text' : ''
+                            "
+                          >
+                            {{ child.name }}
+                          </span>
+                        </RouterLink>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <RouterLink
+                  v-else
+                  :to="item.path"
+                  class="px-3 py-2 rounded-xl font-semibold text-sm transition duration-200"
+                  :class="
+                    isActive(item.path)
+                      ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
+                      : 'text-subtle hover:text-text hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20'
+                  "
+                >
+                  <div class="flex items-center">
+                    <component :is="item.icon" class="mr-1 size-4" />
+                    {{ item.name }}
+                  </div>
+                </RouterLink>
+              </template>
+            </div>
+          </div>
+
+          <!-- Auth items -->
+          <div class="flex items-center">
+            <RouterLink
+              v-for="item in authItems"
+              :key="item.name"
+              :to="item.path"
+              class="ml-4 px-3 py-2 rounded-xl font-semibold text-sm transition duration-200"
+              :class="
+                isActive(item.path)
+                  ? 'bg-linear-to-br from-rose via-iris to-foam text-base'
+                  : 'text-subtle hover:text-text hover:bg-linear-to-br from-rose/20 via-iris/20 to-foam/20'
+              "
+            >
+              <div class="flex items-center">
+                <component :is="item.icon" class="mr-1 w-4 h-4" />
+                {{ item.name }}
+              </div>
+            </RouterLink>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Header with full title and description -->
+    <header class="bg-surface p-6 px-8 w-screen">
+      <div class="mx-auto max-w-7xl">
+        <div class="flex justify-between">
+          <div class="flex items-center">
+            <component
+              :is="pageInfo.icon"
+              class="flex-shrink-0 bg-linear-to-br from-rose via-iris to-foam p-2 rounded-xl size-12 text-surface"
+            />
+            <div class="ml-4">
+              <h1 class="font-semibold text-text text-2xl">
+                {{ pageInfo.title }}
+              </h1>
+              <p class="font-serif text-subtle italic">
+                {{ pageInfo.description }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Universal sub-navigation for dropdown items -->
+          <ul
+            v-if="activeDropdown"
+            class="flex justify-start items-center gap-y-4"
           >
-            {{ link.name }}
-          </RouterLink>
-        </li>
-      </ul>
+            <li v-for="child in activeDropdown.children" :key="child.name">
+              <RouterLink
+                :to="child.path"
+                class="p-4 font-semibold text-subtle hover:text-text"
+                :class="{ 'colored-text': isActive(child.path, true) }"
+              >
+                {{ child.name }}
+              </RouterLink>
+            </li>
+          </ul>
+        </div>
+      </div>
     </header>
   </div>
 </template>
+
+<style scoped>
+.dropdown {
+  opacity: 0.0001;
+  transform: scale(0.6) translateY(-20%);
+  transition: 0.3s cubic-bezier(0.2, 0, 0, 1.6);
+  display: inline-block;
+  pointer-events: none;
+}
+
+.dropdown.active {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+</style>
